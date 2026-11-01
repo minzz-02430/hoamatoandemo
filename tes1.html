@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f97316">
+  <title>HÒA MA TOÁN · Cổng quản lý trung tâm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-app: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --primary: #F97316;
+      --primary-light: #FFEDD5;
+      --text-heading: #1E293B;
+      --text-desc: #64748B;
+      --border: #F1F5F9;
+      --green: #16A36A;
+      --red: #E25555;
+      --blue: #4B83E5;
+      --purple: #8A65D6;
+      --shadow: 0 4px 20px rgba(0,0,0,0.04);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg-app); color: var(--text-heading); font-family: "Be Vietnam Pro", Arial, sans-serif; font-size: 13px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .topbar { height: 74px; padding: 0 30px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 24px; position: sticky; top: 0; z-index: 20; }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 230px; color: var(--text-heading); text-decoration: none; font-weight: 800; letter-spacing: -.3px; }
+    .brand-mark { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: linear-gradient(145deg,#fb923c,#ea580c); font-size: 15px; box-shadow: 0 5px 12px #f9731640; }
+    .brand small, .user-meta small { display: block; color: var(--text-desc); font-size: 10px; font-weight: 500; letter-spacing: 0; margin-top: 3px; }
+    .context { color: var(--text-desc); line-height: 1.65; }
+    .context strong { display: block; color: var(--text-heading); font-size: 12px; }
+    .top-spacer { flex: 1; }
+    .search { height: 38px; min-width: 190px; width: min(250px, 22vw); display: flex; align-items: center; gap: 9px; color: #94a3b8; padding: 0 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 9px; }
+    .search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text-heading); }
+    .icon-button { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 9px; color: var(--text-desc); background: white; position: relative; }
+    .dot { width: 7px; height: 7px; position: absolute; top: 7px; right: 7px; border-radius: 50%; background: var(--red); }
+    .user-chip { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #9a3412; background: #ffedd5; font-weight: 700; flex: 0 0 auto; }
+    .avatar.large { width: 76px; height: 76px; font-size: 23px; }
+    .user-meta strong { display: block; font-size: 12px; }
+    .role-switcher { display: flex; align-items: center; gap: 8px; color: var(--text-desc); font-size: 11px; }
+    .role-switcher select { border: 1px solid #fed7aa; border-radius: 8px; background: #fff7ed; color: #c2410c; padding: 9px 28px 9px 10px; font-weight: 700; outline: 0; }
+    .logout-button { min-height:36px;padding:0 11px;border:1px solid #e2e8f0;border-radius:8px;background:white;color:#64748b;font-size:11px;font-weight:600;white-space:nowrap; }
+    .logout-button:hover { border-color:#fecaca;background:#fff7f7;color:#b91c1c; }
+    .app-layout { min-height: calc(100vh - 74px); display: grid; grid-template-columns: 248px minmax(0,1fr); }
+    .sidebar { background: white; border-right: 1px solid var(--border); padding: 24px 14px; display: flex; flex-direction: column; }
+    .nav-caption { padding: 0 12px; margin: 4px 0 12px; color: #94a3b8; font-size: 10px; font-weight: 700; letter-spacing: .9px; }
+    .nav-list { display: grid; gap: 5px; }
+    .nav-item { width: 100%; min-height: 43px; padding: 0 12px; display: flex; align-items: center; gap: 12px; text-align: left; border: 0; border-left: 4px solid transparent; border-radius: 8px; color: #64748b; background: transparent; transition: .18s ease; }
+    .nav-item i { width: 17px; text-align: center; font-size: 14px; }
+    .nav-item:hover { color: var(--primary); background: var(--primary-light); }
+    .nav-item.active { color: var(--primary); background: #fff4e8; border-left-color: var(--primary); font-weight: 700; }
+    .sidebar-bottom { margin-top: auto; padding: 13px 12px; border-top: 1px solid var(--border); color: var(--text-desc); font-size: 11px; line-height: 1.7; }
+    .sidebar-bottom strong { color: var(--text-heading); }
+    .main { width: 100%; max-width: 1600px; margin: 0 auto; padding: 26px 30px 48px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: 0 0 21px; }
+    .page-heading h1 { margin: 0; font-size: 21px; letter-spacing: -.5px; }
+    .page-heading p { margin: 6px 0 0; color: var(--text-desc); font-size: 12px; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+    .button { min-height: 36px; padding: 0 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; color: #475569; font-weight: 600; transition: .15s ease; }
+    .button:hover { border-color: #fdba74; color: #c2410c; background: #fffaf5; }
+    .button.primary { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 4px 10px #f9731628; }
+    .button.primary:hover { background: #ea580c; }
+    .button.small { min-height: 31px; padding: 0 10px; font-size: 11px; }
+    .card { min-width: 0; padding: 21px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-surface); box-shadow: var(--shadow); }
+    .card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 17px; font-size: 13px; font-weight: 700; }
+    .card-title .muted { color: var(--text-desc); font-size: 10px; font-weight: 500; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 15px; margin-bottom: 17px; }
+    .kpi { padding: 18px 19px; min-height: 126px; position: relative; overflow: hidden; }
+    .kpi-label { color: var(--text-desc); font-size: 11px; font-weight: 600; }
+    .kpi-value { margin: 12px 0 7px; font-size: 25px; line-height: 1.1; font-weight: 800; letter-spacing: -.8px; }
+    .kpi-note { display: flex; align-items: center; gap: 5px; color: var(--green); font-size: 10px; }
+    .kpi-note.warn { color: #d97706; }
+    .kpi-icon { width: 32px; height: 32px; position: absolute; top: 16px; right: 16px; display: grid; place-items: center; border-radius: 9px; background: #fff4e8; color: var(--primary); }
+    .grid-2 { display: grid; grid-template-columns: minmax(0,1.8fr) minmax(280px,1fr); gap: 16px; margin-bottom: 16px; }
+    .grid-equal { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-bottom: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; margin-bottom: 16px; }
+    .chart-wrap { height: 265px; position: relative; }
+    .chart-wrap.short { height: 220px; }
+    .chart-wrap.donut { height: 215px; max-width: 290px; margin: 0 auto; }
+    .progress-row { margin: 14px 0; }
+    .progress-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; font-size: 11px; }
+    .progress-meta span:last-child { color: var(--text-desc); }
+    .progress { height: 8px; overflow: hidden; border-radius: 9px; background: #f1f5f9; }
+    .progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#fb923c,#f97316); }
+    .progress.green span { background: linear-gradient(90deg,#34d399,#10b981); }
+    .progress.blue span { background: linear-gradient(90deg,#60a5fa,#3b82f6); }
+    .tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 4px 8px; color: #b45309; background: #fff4e5; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .tag.green { color: #15803d; background: #dcfce7; }
+    .tag.red { color: #b91c1c; background: #fee2e2; }
+    .tag.blue { color: #1d4ed8; background: #dbeafe; }
+    .tag.gray { color: #64748b; background: #f1f5f9; }
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th { padding: 11px 12px; color: #64748b; background: #f8fafc; font-size: 10px; font-weight: 700; }
+    td { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 11px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--text-heading); }
+    .table-name { display: flex; align-items: center; gap: 9px; }
+    .mini-avatar { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #fff0df; color: #c2410c; font-size: 10px; font-weight: 700; }
+    .stack { display: grid; gap: 16px; }
+    .list-row { padding: 11px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+    .list-row:last-child { padding-bottom: 0; border-bottom: 0; }
+    .list-row:first-child { padding-top: 0; }
+    .list-main { min-width: 0; }
+    .list-main strong { display: block; font-size: 11px; }
+    .list-main small { display: block; margin-top: 4px; color: var(--text-desc); font-size: 10px; }
+    .list-value { text-align: right; white-space: nowrap; font-size: 11px; font-weight: 700; }
+    .notice { padding: 14px; border: 1px solid #fee2e2; border-radius: 10px; background: #fff1f2; color: #991b1b; }
+    .notice + .notice { margin-top: 10px; }
+    .notice strong { display: block; margin-bottom: 5px; font-size: 11px; }
+    .notice p { margin: 0; color: #9f1239; font-size: 10px; line-height: 1.6; }
+    .quick-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+    .quick-action { min-height: 73px; padding: 12px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--text-heading); }
+    .quick-action i { display: block; margin-bottom: 8px; color: var(--primary); }
+    .quick-action span { color: var(--text-desc); font-size: 10px; }
+    .subnav { display: flex; flex-wrap: wrap; gap: 7px; margin: -4px 0 17px; }
+    .subnav .button.active { color: #c2410c; background: #fff4e8; border-color: #fed7aa; }
+    .role-view, .tab-panel, .parent-only { display: none; }
+    .role-view.active, .tab-panel.active, .parent-only.active { display: block; }
+    .role-view.parent-view { grid-column: 1 / -1; }
+    .parent-layout { display: block; }
+    .parent-topnav { display: none; align-items: center; gap: 5px; margin-left: auto; }
+    .parent-view.active ~ .parent-topnav { display: flex; }
+    .parent-nav-button { border: 0; border-radius: 8px; padding: 10px 12px; background: transparent; color: var(--text-desc); font-weight: 600; }
+    .parent-nav-button:hover, .parent-nav-button.active { color: #c2410c; background: #fff4e8; }
+    .student-list { display: grid; gap: 12px; max-width: 930px; }
+    .student-choice { width: 100%; padding: 16px; display: flex; align-items: center; gap: 14px; text-align: left; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .student-choice:hover { border-color: #fdba74; transform: translateY(-1px); }
+    .student-choice-content { flex: 1; }
+    .student-choice-content strong { display: block; margin-bottom: 6px; font-size: 13px; }
+    .student-choice-content span { color: var(--text-desc); font-size: 11px; }
+    .student-details { display: grid; grid-template-columns: minmax(0,1fr) 1.15fr; gap: 16px; margin-bottom: 16px; }
+    .profile-card { display: flex; align-items: center; gap: 17px; }
+    .profile-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .fact small { display: block; margin-bottom: 5px; color: var(--text-desc); font-size: 10px; }
+    .fact strong { font-size: 11px; }
+    .week-grid { display: grid; grid-template-columns: repeat(7,minmax(95px,1fr)); border: 1px solid var(--border); border-radius: 10px; overflow: auto; }
+    .week-day { min-height: 145px; padding: 10px; border-right: 1px solid var(--border); background: white; }
+    .week-day:last-child { border-right: 0; }
+    .week-day h4 { margin: 0 0 10px; text-align: center; color: var(--text-desc); font-size: 10px; }
+    .lesson { margin-top: 7px; padding: 9px 8px; border-radius: 7px; background: #fff0e4; border-left: 3px solid #fb923c; font-size: 9px; line-height: 1.55; }
+    .lesson.blue { background: #eff6ff; border-color: #60a5fa; }
+    .lesson strong { display: block; font-size: 9px; }
+    .class-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; }
+    .class-card h3 { margin: 12px 0 6px; font-size: 14px; }
+    .class-card p { color: var(--text-desc); font-size: 10px; line-height: 1.8; }
+    .class-footer { display: flex; gap: 8px; margin-top: 15px; }
+    .class-footer .button { flex: 1; }
+    .fee-highlight { padding: 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; border-radius: 13px; background: linear-gradient(120deg,#fb923c,#f97316); color: white; box-shadow: 0 9px 24px #f9731630; }
+    .fee-highlight small { opacity: .9; }
+    .fee-highlight h2 { margin: 7px 0; font-size: 27px; }
+    .fee-highlight .button { color: #c2410c; border: 0; }
+    .matrix { display: grid; grid-template-columns: 84px repeat(7,minmax(95px,1fr)); min-width: 800px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .matrix-cell { min-height: 68px; padding: 7px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: white; }
+    .matrix-cell.heading { min-height: 42px; display: grid; place-items: center; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 700; }
+    .matrix-cell.period { display: grid; place-items: center; background: #f8fafc; color: #64748b; font-size: 9px; text-align: center; }
+    .matrix-lesson { padding: 8px; border-radius: 6px; background: #ffedd5; color: #9a3412; font-size: 9px; line-height: 1.5; }
+    .matrix-lesson.blue { background: #dbeafe; color: #1e40af; }
+    .attendance-ring { width: 140px; height: 140px; position: relative; margin: auto; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(#22c55e 0 94%,#e2e8f0 94% 100%); }
+    .attendance-ring:after { content: ""; width: 108px; height: 108px; position: absolute; border-radius: 50%; background: white; }
+    .attendance-ring strong { position: relative; z-index: 1; font-size: 22px; }
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 50; max-width: 360px; padding: 13px 17px; border-radius: 10px; background: #1e293b; color: white; box-shadow: 0 8px 24px #0f172a30; opacity: 0; transform: translateY(12px); pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hidden { display: none !important; }
+    body.auth-locked { overflow: hidden; }
+    body.auth-locked > .topbar, body.auth-locked > .app-layout { visibility: hidden; }
+    .auth-screen { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 22px; background: radial-gradient(ellipse at 9% 95%,#ffedd5 0,transparent 35%),#f8fafc; overflow-y: auto; }
+    .auth-card { width: min(940px,100%); display: grid; grid-template-columns: .92fr 1.08fr; overflow: hidden; border: 1px solid #f1f5f9; border-radius: 20px; background: white; box-shadow: 0 24px 70px #0f172a17; }
+    .auth-art { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 34px; overflow: hidden; background: linear-gradient(145deg,#fb923c,#ea580c); color: white; }
+    .auth-art:before,.auth-art:after { content: ""; position: absolute; border: 1px solid #ffffff27; border-radius: 50%; pointer-events: none; }
+    .auth-art:before { width: 340px;height:340px;right:-170px;top:110px; }
+    .auth-art:after { width: 480px;height:480px;right:-235px;top:40px; }
+    .auth-brand { display:flex;align-items:center;gap:12px;position:relative;z-index:1;font-size:15px;font-weight:800;letter-spacing:.3px; }
+    .auth-brand-mark { width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff55;border-radius:13px;background:#ffffff25;font-weight:800; }
+    .auth-copy { position:relative;z-index:1;max-width:330px;margin:auto 0; }
+    .auth-copy h1 { margin:0 0 12px;font-size:29px;line-height:1.28;letter-spacing:-.7px; }
+    .auth-copy p { margin:0;color:#fff4e8;font-size:12px;line-height:1.8; }
+    .auth-highlights { position:relative;z-index:1;display:grid;gap:11px;color:#fff8f1;font-size:11px; }
+    .auth-highlights i { width:19px;color:#ffedd5; }
+    .auth-form-side { padding:34px clamp(24px,5vw,54px); display:flex;align-items:center; }
+    .auth-pane { width:100%; }
+    .auth-pane h2 { margin:0 0 7px;font-size:22px;letter-spacing:-.4px; }
+    .auth-subtitle { margin:0 0 22px;color:var(--text-desc);font-size:11px;line-height:1.7; }
+    .auth-field { display:grid;gap:6px;margin:0 0 13px; }
+    .auth-field label { color:#475569;font-size:11px;font-weight:700; }
+    .auth-field input,.auth-field select { width:100%;height:42px;padding:0 12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:var(--text-heading);outline:0; }
+    .auth-field input:focus,.auth-field select:focus { border-color:#fb923c;box-shadow:0 0 0 3px #fff0e4; }
+    .auth-password { position:relative; }
+    .auth-password input { padding-right:68px; }
+    .auth-show-password { position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#c2410c;font-size:10px;font-weight:700; }
+    .auth-options { display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 0 16px;color:var(--text-desc);font-size:10px; }
+    .auth-options label { display:flex;align-items:center;gap:6px; }
+    .auth-options input { accent-color:var(--primary); }
+    .auth-link { padding:0;border:0;background:transparent;color:#c2410c;font-size:10px;font-weight:700; }
+    .auth-submit { width:100%;height:42px;border:0;border-radius:8px;background:var(--primary);color:white;font-weight:700;box-shadow:0 5px 13px #f9731630; }
+    .auth-submit:hover { background:#ea580c; }
+    .auth-message { min-height:18px;margin:10px 0 0;color:var(--red);font-size:10px;line-height:1.5; }
+    .auth-message.success { color:var(--green); }
+    .auth-switch { margin:14px 0 0;text-align:center;color:var(--text-desc);font-size:10px; }
+    .demo-hint { margin-top:17px;padding:10px 12px;border:1px solid #ffedd5;border-radius:8px;background:#fffaf4;color:#9a3412;font-size:10px;line-height:1.65; }
+    .demo-hint strong { color:#7c2d12; }
+    .auth-columns { display:grid;grid-template-columns:1fr 1fr;gap:0 12px; }
+    .ai-launcher { position:fixed;right:24px;bottom:22px;z-index:45;width:54px;height:54px;display:grid;place-items:center;border:0;border-radius:50%;background:linear-gradient(145deg,#fb923c,#ea580c);color:white;box-shadow:0 8px 24px #ea580c55;font-size:19px;transition:transform .18s ease,box-shadow .18s ease; }
+    .ai-launcher:hover { transform:translateY(-2px);box-shadow:0 11px 26px #ea580c66; }
+    .ai-launcher-label { position:absolute;right:64px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--text-heading);font-size:10px;font-weight:700;white-space:nowrap;box-shadow:var(--shadow); }
+    .ai-panel { position:fixed;right:24px;bottom:88px;z-index:45;width:min(380px,calc(100vw - 28px));height:min(570px,calc(100vh - 112px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0;border-radius:16px;background:white;box-shadow:0 18px 56px #0f172a2b; }
+    .ai-panel[hidden] { display:none; }
+    .ai-header { padding:15px 16px;display:flex;align-items:center;gap:10px;background:linear-gradient(120deg,#fff7ed,#fff);border-bottom:1px solid var(--border); }
+    .ai-mark { width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#ffedd5;color:#ea580c; }
+    .ai-title { min-width:0;flex:1; }
+    .ai-title strong { display:block;font-size:12px; }
+    .ai-title small { display:block;margin-top:3px;color:var(--text-desc);font-size:9px; }
+    .ai-close,.ai-clear { width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#64748b; }
+    .ai-close:hover,.ai-clear:hover { background:#f1f5f9;color:#1e293b; }
+    .ai-scope { padding:8px 14px;border-bottom:1px solid var(--border);color:#9a3412;background:#fffaf4;font-size:9px;line-height:1.55; }
+    .ai-messages { flex:1;min-height:0;padding:14px;display:flex;flex-direction:column;gap:11px;overflow:auto;background:#fbfcfe; }
+    .ai-message { max-width:90%;padding:10px 12px;border:1px solid #e9eef5;border-radius:12px 12px 12px 3px;background:white;color:#334155;font-size:10px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere; }
+    .ai-message.user { align-self:flex-end;border-color:#fed7aa;border-radius:12px 12px 3px 12px;background:#fff4e8;color:#7c2d12; }
+    .ai-message.typing { color:#64748b;font-style:italic; }
+    .ai-suggestions { padding:9px 12px 2px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid var(--border);scrollbar-width:thin; }
+    .ai-suggestion { flex:0 0 auto;padding:7px 9px;border:1px solid #fed7aa;border-radius:18px;background:#fffaf4;color:#9a3412;font-size:9px; }
+    .ai-suggestion:hover { background:#ffedd5; }
+    .ai-compose { padding:10px 12px 12px;display:flex;align-items:flex-end;gap:8px; }
+    .ai-compose textarea { flex:1;min-height:40px;max-height:100px;resize:vertical;padding:10px 11px;border:1px solid #e2e8f0;border-radius:10px;outline:0;font:inherit;font-size:10px;line-height:1.5; }
+    .ai-compose textarea:focus { border-color:#fb923c;box-shadow:0 0 0 3px #fff0e4; }
+    .ai-send { flex:0 0 40px;width:40px;height:40px;border:0;border-radius:10px;background:var(--primary);color:white; }
+    .ai-send:disabled { opacity:.55;cursor:wait; }
+    .ai-disclaimer { padding:0 13px 10px;color:#94a3b8;text-align:center;font-size:8px;line-height:1.5; }
+    body.auth-locked .ai-launcher, body.auth-locked .ai-panel { display:none; }
+    .main { padding: 22px 26px 32px; }
+    .page-heading { margin-bottom:17px; }
+    .card { padding:19px; }
+    .grid-2 { gap:13px;margin-bottom:13px; }
+    .grid-equal { gap:13px;margin-bottom:13px; }
+    .grid-3 { gap:13px;margin-bottom:13px; }
+    .kpi-grid { gap:12px;margin-bottom:13px; }
+    .stack { gap:13px; }
+    .chart-wrap { height:235px; }
+    .chart-wrap.short { height:200px; }
+    @media (max-width: 1100px) {
+      .topbar { padding: 0 18px; gap: 13px; }
+      .brand { min-width: auto; }
+      .context, .search { display: none; }
+      .app-layout { grid-template-columns: 210px minmax(0,1fr); }
+      .main { padding: 22px 18px 40px; }
+      .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .auth-screen { padding:12px; }
+      .auth-card { max-width:480px;grid-template-columns:1fr; }
+      .auth-art { min-height:170px;padding:20px 22px; }
+      .auth-copy { margin:20px 0 0; }
+      .auth-copy h1 { font-size:21px; }
+      .auth-copy p,.auth-highlights { display:none; }
+      .auth-form-side { padding:24px 22px; }
+      .topbar { height: auto; min-height: 70px; padding: 10px 13px; flex-wrap: wrap; }
+      .brand { flex: 1; }
+      .top-spacer { display: none; }
+      .user-meta, .icon-button { display: none; }
+      .role-switcher { width: 100%; justify-content: flex-end; }
+      .role-switcher span { display: none; }
+      .role-switcher select { width: 100%; }
+      .app-layout { display: block; min-height: auto; }
+      .sidebar { padding: 10px; border: 0; border-bottom: 1px solid var(--border); }
+      .nav-caption, .sidebar-bottom { display: none; }
+      .nav-list { display: flex; overflow-x: auto; gap: 5px; }
+      .nav-item { width: auto; flex: 0 0 auto; min-height: 39px; padding: 0 11px; border-left: 0; border-bottom: 3px solid transparent; }
+      .nav-item.active { border-left-color: transparent; border-bottom-color: var(--primary); }
+      .main { padding: 19px 13px 32px; }
+      .page-heading { flex-direction: column; }
+      .kpi-grid { gap: 9px; }
+      .kpi { min-height: 114px; padding: 14px; }
+      .kpi-value { font-size: 21px; }
+      .grid-equal, .grid-3, .student-details, .class-grid { grid-template-columns: 1fr; }
+      .parent-topnav { width: 100%; order: 4; overflow-x: auto; }
+      .parent-nav-button { flex: 0 0 auto; }
+      .fee-highlight { align-items: flex-start; flex-direction: column; }
+      .profile-facts { grid-template-columns: 1fr; }
+      .ai-launcher { right:14px;bottom:14px;width:48px;height:48px; }
+      .ai-panel { right:8px;bottom:70px;height:min(570px,calc(100vh - 82px)); }
+    }
+    @media (max-width: 420px) {
+      .auth-columns { grid-template-columns:1fr; }
+      .auth-card { border-radius:15px; }
+      .auth-copy h1 { margin-bottom:0; }
+      .kpi-grid { grid-template-columns:1fr 1fr; }
+      .kpi { padding:12px; }
+      .kpi-note { font-size:9px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="auth-screen" id="auth-screen" aria-label="Đăng nhập hệ thống">
+    <div class="auth-card">
+      <aside class="auth-art">
+        <div class="auth-brand"><span class="auth-brand-mark">HM</span><span>HÒA MA TOÁN<small style="display:block;margin-top:3px;font-size:10px;font-weight:500;letter-spacing:0">Hệ thống quản lý trung tâm</small></span></div>
+        <div class="auth-copy"><h1>Chào mừng bạn<br>trở lại!</h1><p>Một không gian kết nối ban giám đốc, cơ sở, giáo viên và phụ huynh để đồng hành cùng hành trình học tập.</p></div>
+        <div class="auth-highlights"><span><i class="fa-solid fa-shield-halved"></i> Truy cập theo đúng vai trò</span><span><i class="fa-solid fa-chart-line"></i> Theo dõi học tập trực quan</span><span><i class="fa-solid fa-heart"></i> Cùng con tiến bộ mỗi ngày</span></div>
+      </aside>
+      <div class="auth-form-side">
+        <section class="auth-pane" id="auth-login-pane">
+          <h2>Đăng nhập</h2><p class="auth-subtitle">Đăng nhập để tiếp tục tới không gian làm việc của bạn.</p>
+          <form id="login-form">
+            <div class="auth-field"><label for="login-username">Tên đăng nhập</label><input id="login-username" name="username" autocomplete="username" required placeholder="Nhập tên đăng nhập"></div>
+            <div class="auth-field"><label for="login-password">Mật khẩu</label><div class="auth-password"><input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Nhập mật khẩu"><button class="auth-show-password" type="button" data-toggle-password="login-password">Hiện</button></div></div>
+            <div class="auth-field"><label for="login-role">Vai trò</label><select id="login-role" name="role" required><option value="admin">Ban giám đốc</option><option value="manager">Quản lý cơ sở</option><option value="teacher">Giáo viên</option><option value="parent">Phụ huynh</option></select><small style="color:var(--text-desc);font-size:10px">Chọn vai trò để tự điền tài khoản demo tương ứng.</small></div>
+            <div class="auth-options"><label><input id="remember-login" type="checkbox"> Ghi nhớ đăng nhập trên thiết bị này</label><button class="auth-link" type="button" data-auth-view="forgot">Quên mật khẩu?</button></div>
+            <button class="auth-submit" type="submit">Đăng nhập <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+            <p class="auth-message" id="login-message" role="status" aria-live="polite"></p>
+          </form>
+          <p class="auth-switch">Chưa có tài khoản? <button class="auth-link" type="button" data-auth-view="register">Đăng ký ngay</button></p>
+          <div class="demo-hint"><strong>Tài khoản demo:</strong> admin / quanly / giaovien / phuhuynh · Mật khẩu: <strong>123456</strong><br>Dữ liệu xác thực chỉ lưu trong trình duyệt này, không dùng cho tài khoản thật.</div>
+        </section>
+        <section class="auth-pane hidden" id="auth-register-pane">
+          <h2>Tạo tài khoản</h2><p class="auth-subtitle">Đăng ký tài khoản demo để trải nghiệm cổng quản lý.</p>
+          <form id="register-form">
+            <div class="auth-columns">
+              <div class="auth-field"><label for="register-name">Họ và tên</label><input id="register-name" required autocomplete="name" placeholder="Nguyễn Văn An"></div>
+              <div class="auth-field"><label for="register-role">Vai trò</label><select id="register-role"><option value="manager">Quản lý cơ sở</option><option value="teacher">Giáo viên</option><option value="parent">Phụ huynh</option><option value="admin">Ban giám đốc</option></select></div>
+            </div>
+            <div class="auth-field"><label for="register-username">Tên đăng nhập</label><input id="register-username" required minlength="3" pattern="[A-Za-z0-9._\-]+" autocomplete="username" placeholder="Tối thiểu 3 ký tự, không dấu cách"></div>
+            <div class="auth-field"><label for="register-email">Email khôi phục</label><input id="register-email" required type="email" autocomplete="email" placeholder="ban@example.com"></div>
+            <div class="auth-columns">
+              <div class="auth-field"><label for="register-password">Mật khẩu</label><input id="register-password" required type="password" minlength="6" autocomplete="new-password" placeholder="Ít nhất 6 ký tự"></div>
+              <div class="auth-field"><label for="register-confirm">Nhập lại mật khẩu</label><input id="register-confirm" required type="password" minlength="6" autocomplete="new-password" placeholder="Xác nhận mật khẩu"></div>
+            </div>
+            <button class="auth-submit" type="submit">Tạo tài khoản</button>
+            <p class="auth-message" id="register-message" role="status" aria-live="polite"></p>
+          </form>
+          <p class="auth-switch">Đã có tài khoản? <button class="auth-link" type="button" data-auth-view="login">Quay lại đăng nhập</button></p>
+        </section>
+        <section class="auth-pane hidden" id="auth-forgot-pane">
+          <h2>Khôi phục mật khẩu</h2><p class="auth-subtitle">Nhập tên đăng nhập và email đã đăng ký để xác minh tài khoản.</p>
+          <form id="forgot-form">
+            <div class="auth-field"><label for="forgot-username">Tên đăng nhập</label><input id="forgot-username" required autocomplete="username" placeholder="Tên đăng nhập của bạn"></div>
+            <div class="auth-field"><label for="forgot-email">Email khôi phục</label><input id="forgot-email" type="email" required autocomplete="email" placeholder="Email đã đăng ký"></div>
+            <button class="auth-submit" type="submit">Xác minh tài khoản</button>
+            <p class="auth-message" id="forgot-message" role="status" aria-live="polite"></p>
+          </form>
+          <p class="auth-switch">Nhớ mật khẩu? <button class="auth-link" type="button" data-auth-view="login">Quay lại đăng nhập</button></p>
+        </section>
+        <section class="auth-pane hidden" id="auth-reset-pane">
+          <h2>Cấp mật khẩu mới</h2><p class="auth-subtitle" id="reset-account-label">Tạo mật khẩu mới cho tài khoản đã xác minh.</p>
+          <form id="reset-form">
+            <div class="auth-field"><label for="reset-password">Mật khẩu mới</label><input id="reset-password" required type="password" minlength="6" autocomplete="new-password" placeholder="Ít nhất 6 ký tự"></div>
+            <div class="auth-field"><label for="reset-confirm">Xác nhận mật khẩu mới</label><input id="reset-confirm" required type="password" minlength="6" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới"></div>
+            <button class="auth-submit" type="submit">Cập nhật mật khẩu</button>
+            <p class="auth-message" id="reset-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </section>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="HÒA MA TOÁN">
+      <span class="brand-mark">HM</span><span>HÒA MA TOÁN<small>Hệ thống quản lý trung tâm</small></span>
+    </a>
+    <div class="context"><strong>Cơ sở 1 · Nguyễn Chí Thanh</strong>Năm học 2026–2027</div>
+    <div class="top-spacer"></div>
+    <label class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="global-search" type="search" placeholder="Tìm kiếm..." aria-label="Tìm kiếm"></label>
+    <button class="icon-button" id="notification-button" type="button" aria-label="Thông báo"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+    <div class="user-chip"><span class="avatar" id="top-avatar">QT</span><span class="user-meta"><strong id="top-role">Ban giám đốc</strong><small id="top-name">Nguyễn Thu Hà</small></span></div>
+    <label class="role-switcher" for="role-selector"><span>Đang xem</span>
+      <select id="role-selector" aria-label="Chọn vai trò">
+        <option value="admin">Ban giám đốc</option>
+        <option value="manager">Quản lý cơ sở</option>
+        <option value="teacher">Giáo viên</option>
+        <option value="parent">Phụ huynh</option>
+      </select>
+    </label>
+    <button class="logout-button" id="btn-logout" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</button>
+    <nav class="parent-topnav" id="parent-topnav" aria-label="Điều hướng phụ huynh">
+      <button class="parent-nav-button active" data-parent-view="schedule" type="button"><i class="fa-regular fa-calendar"></i> Lịch học</button>
+      <button class="parent-nav-button" data-parent-view="fees" type="button"><i class="fa-solid fa-receipt"></i> Học phí</button>
+      <button class="parent-nav-button" data-parent-view="results" type="button"><i class="fa-solid fa-chart-line"></i> Kết quả</button>
+      <button class="parent-nav-button" data-parent-view="children" type="button"><i class="fa-solid fa-children"></i> Danh sách con</button>
+    </nav>
+  </header>
+
+  <div class="app-layout" id="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <p class="nav-caption">KHÔNG GIAN LÀM VIỆC</p>
+      <nav class="nav-list" id="role-navigation" aria-label="Điều hướng chính"></nav>
+      <div class="sidebar-bottom"><strong><i class="fa-regular fa-calendar"></i> Năm học hiện tại</strong><br>2026 – 2027<br><span>● Hệ thống đang hoạt động</span></div>
+    </aside>
+    <main class="main">
+      <div class="role-view active" id="role-admin">
+        <section class="tab-panel active" id="admin-dashboard">
+          <div class="page-heading"><div><h1>Dashboard tổng quan</h1><p>Tổng quan hoạt động trung tâm · Cập nhật lúc 08:30 hôm nay</p></div><div class="actions"><button class="button" data-action="export"><i class="fa-solid fa-download"></i> Xuất báo cáo</button><button class="button primary" data-action="add-student"><i class="fa-solid fa-plus"></i> Thêm học viên</button></div></div>
+          <div class="kpi-grid">
+            <article class="card kpi"><span class="kpi-icon"><i class="fa-solid fa-user-graduate"></i></span><div class="kpi-label">Học viên đang học</div><div class="kpi-value">248</div><div class="kpi-note"><i class="fa-solid fa-arrow-trend-up"></i> 12% so với tháng trước</div></article>
+            <article class="card kpi"><span class="kpi-icon"><i class="fa-solid fa-wallet"></i></span><div class="kpi-label">Doanh thu tháng</div><div class="kpi-value">270 <small style="font-size:13px">triệu</small></div><div class="kpi-note"><i class="fa-solid fa-arrow-trend-up"></i> 8,5% so với tháng trước</div></article>
+            <article class="card kpi"><span class="kpi-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span><div class="kpi-label">Học phí chưa thu</div><div class="kpi-value">30 <small style="font-size:13px">triệu</small></div><div class="kpi-note warn"><i class="fa-solid fa-circle-exclamation"></i> 8 khoản cần nhắc phí</div></article>
+            <article class="card kpi"><span class="kpi-icon"><i class="fa-solid fa-people-group"></i></span><div class="kpi-label">Lương chờ duyệt</div><div class="kpi-value">48 <small style="font-size:13px">triệu</small></div><div class="kpi-note warn"><i class="fa-regular fa-clock"></i> 12 nhân sự · hạn 31/10</div></article>
+          </div>
+          <div class="grid-2">
+            <article class="card"><h2 class="card-title">Doanh thu &amp; thu học phí theo tuần <span class="muted">Đơn vị: triệu đồng</span></h2><div class="chart-wrap"><canvas id="admin-week-chart" aria-label="Biểu đồ doanh thu và thu học phí theo tuần"></canvas></div></article>
+            <article class="card"><h2 class="card-title">Cơ cấu học viên <span class="muted">248 học viên</span></h2>
+              <div class="progress-row"><div class="progress-meta"><span>Khối 1–5</span><span>92 học viên · 37%</span></div><div class="progress"><span style="width:37%"></span></div></div>
+              <div class="progress-row"><div class="progress-meta"><span>Khối 6–9</span><span>84 học viên · 34%</span></div><div class="progress blue"><span style="width:34%"></span></div></div>
+              <div class="progress-row"><div class="progress-meta"><span>Khối 10–12</span><span>72 học viên · 29%</span></div><div class="progress green"><span style="width:29%"></span></div></div>
+              <div style="padding-top:12px;color:var(--text-desc);font-size:10px">Tỷ lệ duy trì học viên <strong style="float:right;color:var(--green)">96,2%</strong></div>
+            </article>
+          </div>
+          <div class="grid-2">
+            <article class="card"><h2 class="card-title">Học phí quá hạn <span class="tag red">5 khoản cần xử lý</span></h2><div class="table-wrap"><table><thead><tr><th>HỌC VIÊN</th><th>LỚP</th><th>SỐ TIỀN</th><th>QUÁ HẠN</th><th></th></tr></thead><tbody>
+              <tr><td><div class="table-name"><span class="mini-avatar">MA</span><strong>Nguyễn Minh Anh</strong></div></td><td>Toán 5A</td><td><strong>4.800.000đ</strong></td><td><span class="tag red">8 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr>
+              <tr><td><div class="table-name"><span class="mini-avatar">HN</span><strong>Trần Hoàng Nam</strong></div></td><td>Toán 12A</td><td><strong>4.200.000đ</strong></td><td><span class="tag red">6 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr>
+              <tr><td><div class="table-name"><span class="mini-avatar">LB</span><strong>Lê Bảo Ngọc</strong></div></td><td>Toán 8B</td><td><strong>3.800.000đ</strong></td><td><span class="tag red">3 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr>
+            </tbody></table></div></article>
+            <div class="stack">
+              <article class="card"><h2 class="card-title">Kỳ lương chờ duyệt <span class="tag">Tháng 10</span></h2><div class="list-row"><div class="list-main"><strong>12 phiếu lương giáo viên</strong><small>Hạn duyệt 31/10/2026</small></div><button class="button small" data-action="review">Duyệt</button></div></article>
+              <article class="card"><h2 class="card-title">Lớp học sắp tới <span class="muted">Hôm nay</span></h2><div class="list-row"><div class="list-main"><strong>18:00 · Toán 9A</strong><small>GV Nguyễn Thu Hà · Phòng 201</small></div><span class="tag green">Đúng lịch</span></div><div class="list-row"><div class="list-main"><strong>19:30 · Toán 12A</strong><small>GV Trần Văn Anh · Phòng 203</small></div><span class="tag blue">Còn 40 phút</span></div></article>
+            </div>
+          </div>
+        </section>
+        <section class="tab-panel" id="admin-crm"><div class="page-heading"><div><h1>CRM · Quản lý khách hàng</h1><p>Theo dõi tư vấn tuyển sinh và chăm sóc khách hàng tiềm năng.</p></div><button class="button primary" data-action="add-lead"><i class="fa-solid fa-plus"></i> Thêm khách hàng</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Khách hàng tiềm năng</div><div class="kpi-value">126</div><div class="kpi-note">18 khách mới tuần này</div></article><article class="card kpi"><div class="kpi-label">Lịch tư vấn hôm nay</div><div class="kpi-value">14</div><div class="kpi-note">5 lịch chưa xác nhận</div></article><article class="card kpi"><div class="kpi-label">Tỷ lệ chuyển đổi</div><div class="kpi-value">32%</div><div class="kpi-note">Tăng 4% trong tháng</div></article><article class="card kpi"><div class="kpi-label">Học viên mới</div><div class="kpi-value">28</div><div class="kpi-note">Trong tháng 10</div></article></div><article class="card"><h2 class="card-title">Danh sách khách hàng cần tư vấn</h2><div class="table-wrap"><table><thead><tr><th>PHỤ HUYNH</th><th>SỐ ĐIỆN THOẠI</th><th>KHÓA HỌC QUAN TÂM</th><th>NGUỒN</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><strong>Chị Nguyễn Thu Trang</strong></td><td>09xx xxx 245</td><td>Toán nâng cao lớp 5</td><td>Facebook</td><td><span class="tag">Chờ tư vấn</span></td></tr><tr><td><strong>Anh Lê Minh Đức</strong></td><td>09xx xxx 817</td><td>Luyện thi vào 10</td><td>Giới thiệu</td><td><span class="tag green">Đã đặt lịch</span></td></tr><tr><td><strong>Chị Phạm Hoài An</strong></td><td>09xx xxx 362</td><td>Toán tư duy lớp 3</td><td>Website</td><td><span class="tag blue">Đang theo dõi</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="admin-education"><div class="page-heading"><div><h1>Học vụ &amp; Đào tạo</h1><p>Tổng quan lớp học, chương trình và lịch giảng dạy.</p></div><button class="button primary" data-action="add-class"><i class="fa-solid fa-plus"></i> Tạo lớp học</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Lớp đang mở</div><div class="kpi-value">32</div><div class="kpi-note">4 lớp mới trong tháng</div></article><article class="card kpi"><div class="kpi-label">Giáo viên giảng dạy</div><div class="kpi-value">18</div><div class="kpi-note">15 cơ hữu · 3 thỉnh giảng</div></article><article class="card kpi"><div class="kpi-label">Tỷ lệ lấp đầy</div><div class="kpi-value">85%</div><div class="kpi-note">Tốt hơn tháng trước 6%</div></article><article class="card kpi"><div class="kpi-label">Buổi học tuần này</div><div class="kpi-value">96</div><div class="kpi-note">3 lịch cần xác nhận</div></article></div><article class="card"><h2 class="card-title">Lớp học đang hoạt động</h2><div class="table-wrap"><table><thead><tr><th>TÊN LỚP</th><th>GIÁO VIÊN</th><th>LỊCH HỌC</th><th>SĨ SỐ</th><th>TỶ LỆ LẤP ĐẦY</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><strong>Toán nâng cao 5A</strong></td><td>Nguyễn Thu Hà</td><td>Thứ 2, 18:00</td><td>18/20</td><td>90%</td><td><span class="tag green">Đang học</span></td></tr><tr><td><strong>Luyện thi vào 10</strong></td><td>Trần Văn Anh</td><td>Thứ 4, 18:00</td><td>15/15</td><td>100%</td><td><span class="tag red">Đủ sĩ số</span></td></tr><tr><td><strong>Toán tư duy lớp 3</strong></td><td>Lê Thị Bình</td><td>Thứ 7, 09:00</td><td>12/16</td><td>75%</td><td><span class="tag green">Đang học</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="admin-hr"><div class="page-heading"><div><h1>Quản lý nhân sự</h1><p>Hồ sơ nhân sự, chấm công và phê duyệt lương.</p></div><button class="button primary" data-action="add-employee"><i class="fa-solid fa-plus"></i> Thêm nhân sự</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Tổng nhân sự</div><div class="kpi-value">24</div><div class="kpi-note">18 giáo viên · 6 vận hành</div></article><article class="card kpi"><div class="kpi-label">Có mặt hôm nay</div><div class="kpi-value">21</div><div class="kpi-note">87,5% nhân sự</div></article><article class="card kpi"><div class="kpi-label">Nghỉ phép</div><div class="kpi-value">2</div><div class="kpi-note">Đã được phê duyệt</div></article><article class="card kpi"><div class="kpi-label">Chờ duyệt</div><div class="kpi-value">12</div><div class="kpi-note warn">Phiếu lương tháng 10</div></article></div><article class="card"><h2 class="card-title">Nhân sự gần đây</h2><div class="table-wrap"><table><thead><tr><th>NHÂN SỰ</th><th>VỊ TRÍ</th><th>CƠ SỞ</th><th>NGÀY VÀO LÀM</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><strong>Nguyễn Thu Hà</strong></td><td>Giáo viên Toán</td><td>Nguyễn Chí Thanh</td><td>12/08/2023</td><td><span class="tag green">Đang làm việc</span></td></tr><tr><td><strong>Trần Văn Anh</strong></td><td>Giáo viên Toán</td><td>Nguyễn Chí Thanh</td><td>03/04/2022</td><td><span class="tag green">Đang làm việc</span></td></tr><tr><td><strong>Lê Thị Bình</strong></td><td>Giáo viên Toán</td><td>Nguyễn Chí Thanh</td><td>21/06/2024</td><td><span class="tag green">Đang làm việc</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="admin-finance">
+          <div class="page-heading"><div><h1>Tài chính &amp; Kế toán</h1><p>Quản lý dòng tiền, thu chi và công nợ của trung tâm.</p></div><div class="actions"><button class="button" data-action="create-expense"><i class="fa-solid fa-minus"></i> Tạo phiếu chi</button><button class="button primary" data-action="create-income"><i class="fa-solid fa-plus"></i> Tạo phiếu thu</button></div></div>
+          <div class="subnav" aria-label="Phân hệ tài chính"><button class="button active" data-finance-tab="cashflow">Báo cáo Dòng tiền</button><button class="button" data-finance-tab="income">Quản lý Thu</button><button class="button" data-finance-tab="expense">Quản lý Chi</button><button class="button" data-finance-tab="debt">Công nợ</button></div>
+          <div class="tab-panel active" id="finance-cashflow"><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Tổng Thu</div><div class="kpi-value" style="color:var(--green)">350M</div><div class="kpi-note">Học phí và dịch vụ tháng này</div></article><article class="card kpi"><div class="kpi-label">Tổng Chi</div><div class="kpi-value" style="color:var(--red)">120M</div><div class="kpi-note">Chi hoạt động, lương và vận hành</div></article><article class="card kpi"><div class="kpi-label">Lợi nhuận gộp</div><div class="kpi-value">230M</div><div class="kpi-note">Chênh lệch giữa thu và chi</div></article><article class="card kpi"><div class="kpi-label">Công nợ cần thu</div><div class="kpi-value" style="color:#d97706">45M</div><div class="kpi-note warn">Cần thu từ phụ huynh và đối tác</div></article></div><article class="card" style="margin-bottom:16px"><h2 class="card-title">Cân đối Thu – Chi 6 tháng gần nhất <span class="muted">Đơn vị: triệu đồng</span></h2><div class="chart-wrap"><canvas id="finance-chart" aria-label="Biểu đồ Thu Chi sáu tháng"></canvas></div></article><article class="card"><h2 class="card-title">Lịch sử giao dịch gần đây <button class="button small" data-action="export"><i class="fa-solid fa-download"></i> Xuất danh sách</button></h2><div class="table-wrap"><table><thead><tr><th>NGÀY GIAO DỊCH</th><th>LOẠI</th><th>HẠNG MỤC</th><th>SỐ TIỀN</th><th>NGƯỜI PHỤ TRÁCH</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td>28/10/2026</td><td><span class="tag green">Thu</span></td><td>Học phí tháng 10 · Toán 5A</td><td><strong>4.800.000đ</strong></td><td>Nguyễn Thu Hà</td><td>Đã xác nhận</td></tr><tr><td>27/10/2026</td><td><span class="tag red">Chi</span></td><td>Lương giáo viên tháng 10</td><td><strong>28.000.000đ</strong></td><td>Trần Minh Quân</td><td>Đã xác nhận</td></tr><tr><td>26/10/2026</td><td><span class="tag green">Thu</span></td><td>Học phí tháng 10 · Toán 9A</td><td><strong>5.200.000đ</strong></td><td>Lê Thị Bình</td><td>Đã xác nhận</td></tr><tr><td>25/10/2026</td><td><span class="tag red">Chi</span></td><td>Văn phòng phẩm</td><td><strong>1.250.000đ</strong></td><td>Nguyễn Thu Hà</td><td>Đã xác nhận</td></tr></tbody></table></div></article></div>
+          <div class="tab-panel" id="finance-income"><article class="card"><h2 class="card-title">Quản lý Thu <button class="button primary small" data-action="create-income"><i class="fa-solid fa-plus"></i> Tạo phiếu thu</button></h2><p style="color:var(--text-desc)">Tổng thu tháng 10: <strong style="color:var(--green)">350.000.000đ</strong></p><div class="table-wrap"><table><thead><tr><th>MÃ PHIẾU</th><th>NGÀY</th><th>HẠNG MỤC</th><th>NGƯỜI NỘP</th><th>SỐ TIỀN</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td>PT-1028</td><td>28/10/2026</td><td>Học phí tháng 10</td><td>Nguyễn Minh Anh</td><td><strong>4.800.000đ</strong></td><td><span class="tag green">Đã thu</span></td></tr><tr><td>PT-1026</td><td>26/10/2026</td><td>Học phí tháng 10</td><td>Trần Hoàng Nam</td><td><strong>4.200.000đ</strong></td><td><span class="tag green">Đã thu</span></td></tr></tbody></table></div></article></div>
+          <div class="tab-panel" id="finance-expense"><article class="card"><h2 class="card-title">Quản lý Chi <button class="button primary small" data-action="create-expense"><i class="fa-solid fa-plus"></i> Tạo phiếu chi</button></h2><p style="color:var(--text-desc)">Tổng chi tháng 10: <strong style="color:var(--red)">120.000.000đ</strong></p><div class="table-wrap"><table><thead><tr><th>MÃ PHIẾU</th><th>NGÀY</th><th>HẠNG MỤC</th><th>NGƯỜI NHẬN</th><th>SỐ TIỀN</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td>PC-1027</td><td>27/10/2026</td><td>Lương giáo viên</td><td>Trần Văn Anh</td><td><strong>28.000.000đ</strong></td><td><span class="tag green">Đã chi</span></td></tr><tr><td>PC-1025</td><td>25/10/2026</td><td>Văn phòng phẩm</td><td>Nhà sách Tiến Thọ</td><td><strong>1.250.000đ</strong></td><td><span class="tag green">Đã chi</span></td></tr></tbody></table></div></article></div>
+          <div class="tab-panel" id="finance-debt"><article class="card"><h2 class="card-title">Công nợ cần thu <span class="tag red">45.000.000đ</span></h2><div class="table-wrap"><table><thead><tr><th>HỌC VIÊN</th><th>LỚP</th><th>HẠN ĐÓNG</th><th>SỐ TIỀN</th><th>TÌNH TRẠNG</th><th></th></tr></thead><tbody><tr><td><strong>Nguyễn Minh Anh</strong></td><td>Toán 5A</td><td>20/10/2026</td><td>4.800.000đ</td><td><span class="tag red">Quá hạn 8 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr><tr><td><strong>Trần Hoàng Nam</strong></td><td>Toán 12A</td><td>22/10/2026</td><td>4.200.000đ</td><td><span class="tag red">Quá hạn 6 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr><tr><td><strong>Lê Bảo Ngọc</strong></td><td>Toán 8B</td><td>25/10/2026</td><td>3.800.000đ</td><td><span class="tag">Quá hạn 3 ngày</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr></tbody></table></div></article></div>
+        </section>
+        <section class="tab-panel" id="admin-support"><div class="page-heading"><div><h1>Chăm sóc khách hàng</h1><p>Tiếp nhận và theo dõi các yêu cầu hỗ trợ từ phụ huynh.</p></div><button class="button primary" data-action="add-ticket"><i class="fa-solid fa-plus"></i> Tạo yêu cầu</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Yêu cầu mới</div><div class="kpi-value">8</div><div class="kpi-note warn">Cần phản hồi trong hôm nay</div></article><article class="card kpi"><div class="kpi-label">Đang xử lý</div><div class="kpi-value">12</div><div class="kpi-note">5 yêu cầu được giao</div></article><article class="card kpi"><div class="kpi-label">Đã hoàn thành</div><div class="kpi-value">46</div><div class="kpi-note">Trong tháng 10</div></article><article class="card kpi"><div class="kpi-label">Thời gian phản hồi TB</div><div class="kpi-value">2,4h</div><div class="kpi-note">Nhanh hơn tháng trước</div></article></div><article class="card"><h2 class="card-title">Yêu cầu gần đây</h2><div class="table-wrap"><table><thead><tr><th>MÃ YÊU CẦU</th><th>PHỤ HUYNH</th><th>NỘI DUNG</th><th>NGƯỜI PHỤ TRÁCH</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td>CS-0284</td><td><strong>Chị Nguyễn Thu Trang</strong></td><td>Hỏi về lịch học bù lớp 5A</td><td>Lê Thị Bình</td><td><span class="tag">Mới</span></td></tr><tr><td>CS-0283</td><td><strong>Anh Trần Minh Quân</strong></td><td>Xác nhận biên lai học phí</td><td>Nguyễn Thu Hà</td><td><span class="tag blue">Đang xử lý</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="admin-reports"><div class="page-heading"><div><h1>Tổng quan Báo cáo</h1><p>Báo cáo hoạt động và chất lượng đào tạo toàn trung tâm.</p></div><div class="actions"><button class="button" data-action="export"><i class="fa-solid fa-file-excel"></i> Xuất báo cáo</button></div></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Học viên đang theo học</div><div class="kpi-value">450</div><div class="kpi-note">Tăng 12% so với kỳ trước</div></article><article class="card kpi"><div class="kpi-label">Tổng số lớp mở</div><div class="kpi-value">32</div><div class="kpi-note">14 học sinh bình quân</div></article><article class="card kpi"><div class="kpi-label">Hiệu suất lấp đầy</div><div class="kpi-value">85%</div><div class="kpi-note">Tỷ lệ tốt trong kỳ</div></article><article class="card kpi"><div class="kpi-label">Tỷ lệ thu phí đúng hạn</div><div class="kpi-value">92%</div><div class="kpi-note">Tăng 3% so với quý trước</div></article></div><div class="grid-2"><article class="card"><h2 class="card-title">Tăng trưởng học viên &amp; doanh thu</h2><div class="chart-wrap"><canvas id="growth-chart" aria-label="Biểu đồ tăng trưởng"></canvas></div></article><article class="card"><h2 class="card-title">Phân bổ học viên theo khóa học</h2><div class="chart-wrap donut"><canvas id="course-chart" aria-label="Biểu đồ tròn phân bổ khóa học"></canvas></div></article></div><article class="card"><h2 class="card-title">Đánh giá chất lượng lớp học &amp; giáo viên <span class="tag">Học kỳ I</span></h2><div class="table-wrap"><table><thead><tr><th>KHÓA HỌC</th><th>LỚP HỌC</th><th>GIÁO VIÊN</th><th>SĨ SỐ</th><th>CHUYÊN CẦN</th><th>ĐIỂM TB</th><th>THU PHÍ</th></tr></thead><tbody><tr><td>Toán Tiểu học</td><td>Lớp 5A</td><td>Nguyễn Thu Hà</td><td>18</td><td>92%</td><td>8,4</td><td><span class="tag green">98%</span></td></tr><tr><td>Luyện thi vào 10</td><td>Lớp 9A</td><td>Trần Văn Anh</td><td>15</td><td>96%</td><td>8,8</td><td><span class="tag green">100%</span></td></tr><tr><td>Toán THCS</td><td>Lớp 8B</td><td>Lê Thị Bình</td><td>16</td><td>88%</td><td>7,9</td><td><span class="tag">91%</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="admin-settings"><div class="page-heading"><div><h1>Cài đặt hệ thống</h1><p>Thiết lập thông tin trung tâm và năm học.</p></div></div><div class="grid-equal"><article class="card"><h2 class="card-title">Thông tin trung tâm</h2><div class="fact"><small>Tên trung tâm</small><strong>HÒA MA TOÁN · Trung tâm Toán học</strong></div><div class="fact" style="margin-top:16px"><small>Cơ sở hiện tại</small><strong>Cơ sở 1 · Số 20 Nguyễn Chí Thanh, Hà Nội</strong></div><div class="fact" style="margin-top:16px"><small>Năm học</small><strong>2026 – 2027</strong></div></article><article class="card"><h2 class="card-title">Tùy chọn thông báo</h2><div class="list-row"><div class="list-main"><strong>Nhắc học phí đến hạn</strong><small>Gửi thông báo trước hạn 3 ngày</small></div><span class="tag green">Đang bật</span></div><div class="list-row"><div class="list-main"><strong>Báo cáo hoạt động tuần</strong><small>Gửi vào sáng thứ Hai</small></div><span class="tag green">Đang bật</span></div><button class="button" style="margin-top:16px" data-action="save-settings">Lưu cài đặt</button></article></div></section>
+      </div>
+
+      <div class="role-view" id="role-manager">
+        <section class="tab-panel active" id="manager-home"><div class="page-heading"><div><h1>Trang chủ · Cơ sở Nguyễn Chí Thanh</h1><p>Tổng quan hoạt động cơ sở trong ngày hôm nay.</p></div><button class="button primary" data-action="add-student"><i class="fa-solid fa-plus"></i> Thêm học viên</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Học viên tại cơ sở</div><div class="kpi-value">248</div><div class="kpi-note">12 học viên mới tháng này</div></article><article class="card kpi"><div class="kpi-label">Lớp đang hoạt động</div><div class="kpi-value">18</div><div class="kpi-note">4 lớp có thể tuyển thêm</div></article><article class="card kpi"><div class="kpi-label">Giáo viên</div><div class="kpi-value">12</div><div class="kpi-note">10 có lịch dạy hôm nay</div></article><article class="card kpi"><div class="kpi-label">Thu học phí tháng này</div><div class="kpi-value">92%</div><div class="kpi-note warn">8 khoản còn chờ thu</div></article></div><div class="grid-2"><article class="card"><h2 class="card-title">KHỐI CẦN XỬ LÝ <span class="tag red"><i class="fa-solid fa-triangle-exclamation"></i> 3 cảnh báo</span></h2><div class="notice"><strong><i class="fa-solid fa-money-bill-wave"></i> Học phí quá hạn · 5 học viên</strong><p>Tổng công nợ 18.600.000đ. Cần liên hệ phụ huynh và cập nhật trạng thái thu phí.</p></div><div class="notice"><strong><i class="fa-regular fa-calendar-xmark"></i> Trùng lịch phòng · 2 lớp</strong><p>Toán 8B và Toán 9A cùng sử dụng phòng 201 lúc 18:00 thứ Tư.</p></div><div class="notice"><strong><i class="fa-solid fa-user-clock"></i> Thiếu giáo viên xác nhận · 1 ca</strong><p>Lớp Toán 5A lúc 16:30 hôm nay chưa xác nhận giáo viên phụ trách.</p></div></article><div class="stack"><article class="card"><h2 class="card-title">Thao tác nhanh</h2><div class="quick-actions"><button class="quick-action" data-action="add-student"><i class="fa-solid fa-user-plus"></i><span>Thêm học viên</span></button><button class="quick-action" data-action="add-class"><i class="fa-solid fa-chalkboard"></i><span>Tạo lớp học</span></button><button class="quick-action" data-action="attendance"><i class="fa-solid fa-clipboard-check"></i><span>Điểm danh</span></button><button class="quick-action" data-action="export"><i class="fa-solid fa-file-export"></i><span>Xuất báo cáo</span></button></div></article><article class="card"><h2 class="card-title">Nhật ký hoạt động <span class="muted">Hôm nay</span></h2><div class="list-row"><div class="list-main"><strong>Nguyễn Thu Hà cập nhật điểm danh lớp 5A</strong><small>08:25 · Học vụ</small></div></div><div class="list-row"><div class="list-main"><strong>Đã ghi nhận học phí của Lê Bảo Nam</strong><small>08:12 · Tài chính</small></div></div><div class="list-row"><div class="list-main"><strong>Trần Văn Anh gửi đề xuất dạy bù</strong><small>07:48 · Nhân sự</small></div></div></article></div></div></section>
+        <section class="tab-panel" id="manager-teachers"><div class="page-heading"><div><h1>Giáo viên cơ sở</h1><p>Danh sách giáo viên và lịch giảng dạy tại cơ sở.</p></div><button class="button primary" data-action="add-employee">Thêm giáo viên</button></div><article class="card"><div class="table-wrap"><table><thead><tr><th>GIÁO VIÊN</th><th>CHUYÊN MÔN</th><th>SỐ LỚP</th><th>LỊCH HÔM NAY</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><div class="table-name"><span class="mini-avatar">NH</span><strong>Nguyễn Thu Hà</strong></div></td><td>Toán Tiểu học</td><td>4 lớp</td><td>16:30 · Toán 5A</td><td><span class="tag green">Đang hoạt động</span></td></tr><tr><td><div class="table-name"><span class="mini-avatar">VA</span><strong>Trần Văn Anh</strong></div></td><td>Toán THCS</td><td>3 lớp</td><td>18:00 · Toán 9A</td><td><span class="tag green">Đang hoạt động</span></td></tr><tr><td><div class="table-name"><span class="mini-avatar">LB</span><strong>Lê Thị Bình</strong></div></td><td>Toán tư duy</td><td>3 lớp</td><td>Không có lịch</td><td><span class="tag gray">Nghỉ hôm nay</span></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="manager-students"><div class="page-heading"><div><h1>Học viên</h1><p>Danh sách học viên đang theo học tại cơ sở.</p></div><button class="button primary" data-action="add-student">Thêm học viên</button></div><article class="card"><div class="table-wrap"><table><thead><tr><th>HỌC VIÊN</th><th>LỚP ĐANG HỌC</th><th>PHỤ HUYNH</th><th>HỌC PHÍ</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><strong>Nguyễn Minh Anh</strong></td><td>Toán nâng cao 5A</td><td>Trần Minh Quân</td><td><span class="tag red">Chưa đóng</span></td><td>Đang học</td></tr><tr><td><strong>Lê Bảo Nam</strong></td><td>Luyện thi vào 10</td><td>Lê Thu Trang</td><td><span class="tag green">Đã đóng</span></td><td>Đang học</td></tr><tr><td><strong>Trần Thảo Chi</strong></td><td>Toán cơ bản lớp 3</td><td>Trần Hoài An</td><td><span class="tag green">Đã đóng</span></td><td>Đang học</td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="manager-courses"><div class="page-heading"><div><h1>Khóa học</h1><p>Chương trình đào tạo hiện có tại cơ sở.</p></div><button class="button primary" data-action="add-class">Tạo khóa học</button></div><div class="grid-3"><article class="card"><span class="tag">Tiểu học</span><h3>Toán tư duy</h3><p>Rèn luyện tư duy logic và nền tảng toán học.<br>8 lớp · 96 học viên</p><div class="progress"><span style="width:82%"></span></div></article><article class="card"><span class="tag blue">THCS</span><h3>Toán nâng cao</h3><p>Củng cố kiến thức, phát triển năng lực giải toán.<br>6 lớp · 84 học viên</p><div class="progress blue"><span style="width:76%"></span></div></article><article class="card"><span class="tag green">Luyện thi</span><h3>Luyện thi vào 10</h3><p>Ôn tập chuyên sâu theo chương trình mới.<br>4 lớp · 68 học viên</p><div class="progress green"><span style="width:93%"></span></div></article></div></section>
+        <section class="tab-panel" id="manager-schedule"><div class="page-heading"><div><h1>Lịch khóa biểu</h1><p>Lịch giảng dạy tuần 26/10 – 01/11/2026.</p></div></div><div class="card"><div class="week-grid"><div class="week-day"><h4>THỨ 2</h4><div class="lesson"><strong>16:30 · Toán 5A</strong>Phòng 201 · Cô Hà</div><div class="lesson blue"><strong>18:00 · Toán 8B</strong>Phòng 202 · Thầy Anh</div></div><div class="week-day"><h4>THỨ 3</h4><div class="lesson blue"><strong>17:00 · Toán 9A</strong>Phòng 203 · Thầy Anh</div></div><div class="week-day"><h4>THỨ 4</h4><div class="lesson"><strong>18:00 · Toán 8B</strong>Phòng 201 · Cần xếp lại</div><div class="lesson blue"><strong>18:00 · Toán 9A</strong>Phòng 201 · Trùng phòng</div></div><div class="week-day"><h4>THỨ 5</h4><div class="lesson"><strong>16:30 · Toán 5A</strong>Phòng 201 · Cô Hà</div></div><div class="week-day"><h4>THỨ 6</h4><div class="lesson blue"><strong>18:00 · Toán 9A</strong>Phòng 203 · Thầy Anh</div></div><div class="week-day"><h4>THỨ 7</h4><div class="lesson"><strong>09:00 · Toán tư duy 3</strong>Phòng 202 · Cô Bình</div></div><div class="week-day"><h4>CHỦ NHẬT</h4><span class="tag gray">Không có lịch</span></div></div></div></section>
+        <section class="tab-panel" id="manager-fees"><div class="page-heading"><div><h1>Học phí cơ sở</h1><p>Đối soát học phí và theo dõi các khoản cần thu.</p></div><button class="button" data-action="export">Xuất danh sách</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Đã thu tháng này</div><div class="kpi-value">228M</div><div class="kpi-note">92% kế hoạch</div></article><article class="card kpi"><div class="kpi-label">Chưa thu</div><div class="kpi-value">18,6M</div><div class="kpi-note warn">5 khoản quá hạn</div></article><article class="card kpi"><div class="kpi-label">Chờ đối soát</div><div class="kpi-value">3</div><div class="kpi-note">Giao dịch chuyển khoản</div></article><article class="card kpi"><div class="kpi-label">Miễn giảm</div><div class="kpi-value">6,2M</div><div class="kpi-note">4 học viên</div></article></div><article class="card"><h2 class="card-title">Học phí cần xử lý</h2><div class="table-wrap"><table><thead><tr><th>HỌC VIÊN</th><th>LỚP</th><th>HẠN ĐÓNG</th><th>SỐ TIỀN</th><th>TRẠNG THÁI</th><th></th></tr></thead><tbody><tr><td><strong>Nguyễn Minh Anh</strong></td><td>Toán 5A</td><td>20/10/2026</td><td>4.800.000đ</td><td><span class="tag red">Quá hạn</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr><tr><td><strong>Trần Hoàng Nam</strong></td><td>Toán 12A</td><td>22/10/2026</td><td>4.200.000đ</td><td><span class="tag red">Quá hạn</span></td><td><button class="button small" data-action="remind">Nhắc phí</button></td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="manager-reports"><div class="page-heading"><div><h1>Báo cáo cơ sở</h1><p>Chỉ số vận hành và kết quả đào tạo tại cơ sở.</p></div><button class="button" data-action="export">Xuất báo cáo</button></div><div class="kpi-grid"><article class="card kpi"><div class="kpi-label">Học viên</div><div class="kpi-value">248</div><div class="kpi-note">Tăng 12% tháng này</div></article><article class="card kpi"><div class="kpi-label">Số lớp</div><div class="kpi-value">18</div><div class="kpi-note">15 lớp đang tuyển sinh</div></article><article class="card kpi"><div class="kpi-label">Hiệu suất lấp đầy</div><div class="kpi-value">85%</div><div class="kpi-note">Mục tiêu 90%</div></article><article class="card kpi"><div class="kpi-label">Thu đúng hạn</div><div class="kpi-value">92%</div><div class="kpi-note">Tăng 3% tháng trước</div></article></div><article class="card"><h2 class="card-title">Đánh giá chất lượng lớp học</h2><div class="table-wrap"><table><thead><tr><th>LỚP</th><th>GIÁO VIÊN</th><th>SĨ SỐ</th><th>CHUYÊN CẦN</th><th>ĐIỂM TRUNG BÌNH</th><th>THU PHÍ</th></tr></thead><tbody><tr><td><strong>Toán nâng cao 5A</strong></td><td>Nguyễn Thu Hà</td><td>18/20</td><td>92%</td><td>8,4</td><td>98%</td></tr><tr><td><strong>Luyện thi vào 10</strong></td><td>Trần Văn Anh</td><td>15/15</td><td>96%</td><td>8,8</td><td>100%</td></tr><tr><td><strong>Toán cơ bản 3A</strong></td><td>Lê Thị Bình</td><td>12/16</td><td>88%</td><td>7,9</td><td>91%</td></tr></tbody></table></div></article></section>
+      </div>
+
+      <div class="role-view" id="role-teacher">
+        <section class="tab-panel active" id="teacher-dashboard"><div class="page-heading"><div><h1>Dashboard giáo viên</h1><p>Lịch dạy và hoạt động giảng dạy tuần này.</p></div><button class="button" data-action="export"><i class="fa-solid fa-download"></i> Xuất lịch dạy</button></div><article class="card" style="margin-bottom:16px"><div class="profile-card"><div class="avatar large">NH</div><div><h2 style="margin:0 0 6px;font-size:17px">Nguyễn Thu Hà</h2><span class="tag">Giáo viên Toán</span><div class="profile-facts"><div class="fact"><small>Ngày sinh</small><strong>12/08/1992</strong></div><div class="fact"><small>Cơ sở giảng dạy</small><strong>Nguyễn Chí Thanh, Hà Nội</strong></div><div class="fact"><small>Email</small><strong>ha.nguyen@hoamatoan.vn</strong></div><div class="fact"><small>Thâm niên</small><strong>5 năm · Giáo viên chính thức</strong></div></div></div></div></article><article class="card" style="margin-bottom:16px"><h2 class="card-title">BẢNG MA TRẬN LỊCH DẠY <span class="muted">Tuần 26/10 – 01/11</span></h2><div class="table-wrap"><div class="matrix"><div class="matrix-cell heading">CA HỌC</div><div class="matrix-cell heading">THỨ 2</div><div class="matrix-cell heading">THỨ 3</div><div class="matrix-cell heading">THỨ 4</div><div class="matrix-cell heading">THỨ 5</div><div class="matrix-cell heading">THỨ 6</div><div class="matrix-cell heading">THỨ 7</div><div class="matrix-cell heading">CHỦ NHẬT</div>
+          <div class="matrix-cell period">Ca 1<br>08:00–10:00</div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson blue"><strong>Gia sư Toán</strong>Minh Anh · Online</div></div><div class="matrix-cell"></div><div class="matrix-cell"></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 5B</strong>Phòng 102</div></div><div class="matrix-cell"></div>
+          <div class="matrix-cell period">Ca 2<br>14:00–16:00</div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 5A</strong>Phòng 102</div></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson blue"><strong>Ôn Toán · Linh</strong>Online</div></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 5B</strong>Phòng 104</div></div><div class="matrix-cell"></div><div class="matrix-cell"></div>
+          <div class="matrix-cell period">Ca 3<br>16:00–18:00</div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán Logic 6B</strong>Phòng 203</div></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson blue"><strong>Gia sư Toán</strong>Phòng 201</div></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 7A</strong>Phòng 204</div></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson blue"><strong>Ôn Toán · Nam</strong>Online</div></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán nâng cao</strong>Phòng 201</div></div>
+          <div class="matrix-cell period">Ca 4<br>18:00–20:00</div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 7B</strong>Phòng 202</div></div><div class="matrix-cell"></div><div class="matrix-cell"><div class="matrix-lesson blue"><strong>Gia sư Toán</strong>Online</div></div><div class="matrix-cell"><div class="matrix-lesson"><strong>Toán 8A</strong>Phòng 203</div></div><div class="matrix-cell"></div><div class="matrix-cell"></div></div></div></article><div class="grid-equal"><article class="card"><h2 class="card-title">Tóm tắt công việc hôm nay</h2><div class="list-row"><div class="list-main"><strong>Ca dạy tiếp theo · Toán 5A</strong><small>16:00 – 18:00 · Phòng 102 · 18 học sinh</small></div><span class="tag blue">Sắp tới</span></div><div class="list-row"><div class="list-main"><strong>Chấm bài tập về nhà</strong><small>Lớp Toán Logic 6B · 12 bài chưa chấm</small></div><span class="tag">Cần làm</span></div></article><article class="card"><h2 class="card-title">Lớp đang phụ trách <button class="button small" data-open-tab="teacher-classes">Xem tất cả</button></h2><div class="list-row"><div class="list-main"><strong>Toán nâng cao 5A</strong><small>18 học sinh · Thứ 2, 16:00</small></div><span class="tag green">Đang học</span></div><div class="list-row"><div class="list-main"><strong>Toán Logic 6B</strong><small>12 học sinh · Thứ 2, 18:00</small></div><span class="tag green">Đang học</span></div></article></div></section>
+        <section class="tab-panel" id="teacher-classes"><div class="page-heading"><div><h1>Lớp học đang phụ trách</h1><p>Theo dõi sĩ số, lịch học sắp tới và tiến độ lớp.</p></div><button class="button"><i class="fa-solid fa-filter"></i> Lọc lớp</button></div><div class="class-grid">
+          <article class="card class-card"><span class="tag">Lớp tiêu chuẩn</span><h3>Toán nâng cao 10A</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 2, 14:00 – 15:30<br><i class="fa-solid fa-users"></i> Sĩ số: 8/12 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>75%</span></div><div class="progress"><span style="width:75%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+          <article class="card class-card"><span class="tag blue">Gia sư 1–1</span><h3>Gia sư Toán · Tuấn Anh</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 3, 18:00 – 19:30<br><i class="fa-solid fa-users"></i> Sĩ số: 1/1 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>100%</span></div><div class="progress blue"><span style="width:100%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+          <article class="card class-card"><span class="tag">Lớp tiêu chuẩn</span><h3>Toán Logic 11B</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 6, 08:30 – 10:00<br><i class="fa-solid fa-users"></i> Sĩ số: 6/12 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>50%</span></div><div class="progress green"><span style="width:50%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+          <article class="card class-card"><span class="tag">Lớp tiêu chuẩn</span><h3>Toán 5A</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 5, 16:00 – 18:00<br><i class="fa-solid fa-users"></i> Sĩ số: 18/20 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>90%</span></div><div class="progress"><span style="width:90%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+          <article class="card class-card"><span class="tag">Luyện thi</span><h3>Luyện thi TSA</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 4, 18:00 – 20:00<br><i class="fa-solid fa-users"></i> Sĩ số: 12/12 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>100%</span></div><div class="progress"><span style="width:100%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+          <article class="card class-card"><span class="tag blue">Toán 11</span><h3>Toán nâng cao 11</h3><p><i class="fa-regular fa-calendar"></i> Buổi học tiếp theo: Thứ 7, 08:30 – 10:00<br><i class="fa-solid fa-users"></i> Sĩ số: 8/12 học sinh</p><div class="progress-meta"><span>Tỷ lệ lấp đầy</span><span>67%</span></div><div class="progress blue"><span style="width:67%"></span></div><div class="class-footer"><button class="button small" data-action="attendance">Điểm danh</button><button class="button primary small" data-action="students">Học sinh</button></div></article>
+        </div></section>
+        <section class="tab-panel" id="teacher-results"><div class="page-heading"><div><h1>Quản lý kết quả</h1><p>Cập nhật điểm số, điểm danh và nhận xét học tập.</p></div><button class="button primary" data-action="save-results">Lưu kết quả</button></div><article class="card"><h2 class="card-title">Kết quả học tập · Toán nâng cao 5A</h2><div class="table-wrap"><table><thead><tr><th>HỌC SINH</th><th>ĐIỂM DANH</th><th>ĐIỂM BTVN</th><th>ĐIỂM KIỂM TRA</th><th>NHẬN XÉT</th></tr></thead><tbody><tr><td><strong>Nguyễn Minh Anh</strong></td><td><span class="tag green">Có mặt</span></td><td>9,5</td><td>8,8</td><td>Tích cực phát biểu, nắm bài tốt.</td></tr><tr><td><strong>Lê Thu Hà</strong></td><td><span class="tag red">Vắng có phép</span></td><td>—</td><td>—</td><td>Nghỉ ốm, cần bổ sung bài.</td></tr><tr><td><strong>Phạm Minh Đức</strong></td><td><span class="tag green">Có mặt</span></td><td>7,0</td><td>7,5</td><td>Cần hoàn thành bài tập đầy đủ hơn.</td></tr></tbody></table></div></article></section>
+        <section class="tab-panel" id="teacher-proposal"><div class="page-heading"><div><h1>Đề xuất dạy bù / dạy thay</h1><p>Gửi đề xuất để quản lý cơ sở xét duyệt lịch giảng dạy.</p></div><button class="button primary" data-action="new-proposal"><i class="fa-solid fa-plus"></i> Tạo đề xuất</button></div><article class="card"><h2 class="card-title">Đề xuất gần đây</h2><div class="table-wrap"><table><thead><tr><th>LỚP HỌC</th><th>LOẠI ĐỀ XUẤT</th><th>NGÀY ĐỀ XUẤT</th><th>LÝ DO</th><th>TRẠNG THÁI</th></tr></thead><tbody><tr><td><strong>Toán nâng cao 10A</strong></td><td>Dạy bù</td><td>30/10/2026</td><td>Tham gia tập huấn chuyên môn</td><td><span class="tag">Chờ duyệt</span></td></tr><tr><td><strong>Toán Logic 11B</strong></td><td>Dạy thay</td><td>25/10/2026</td><td>Đã bố trí giáo viên thay thế</td><td><span class="tag green">Đã duyệt</span></td></tr></tbody></table></div></article></section>
+      </div>
+
+      <div class="role-view parent-view" id="role-parent">
+        <section class="parent-only active" id="parent-children"><div class="page-heading"><div><h1>Danh sách con đang theo học</h1><p>Chọn hồ sơ để theo dõi lịch học, học phí và kết quả học tập.</p></div></div><div class="student-list">
+          <button class="student-choice" data-select-child="minh-anh" type="button"><span class="avatar large">MA</span><span class="student-choice-content"><strong>Nguyễn Minh Anh</strong><span><i class="fa-solid fa-book-open"></i> Lớp 5 · Toán nâng cao &nbsp; · &nbsp; <i class="fa-solid fa-location-dot"></i> Cơ sở 1, Nguyễn Chí Thanh</span></span><i class="fa-solid fa-chevron-right" style="color:#94a3b8"></i></button>
+          <button class="student-choice" data-select-child="bao-nam" type="button"><span class="avatar large" style="background:#e0e7ff;color:#3730a3">BN</span><span class="student-choice-content"><strong>Lê Bảo Nam</strong><span><i class="fa-solid fa-book-open"></i> Lớp 9 · Luyện thi vào 10 &nbsp; · &nbsp; <i class="fa-solid fa-location-dot"></i> Cơ sở 1, Nguyễn Chí Thanh</span></span><i class="fa-solid fa-chevron-right" style="color:#94a3b8"></i></button>
+          <button class="student-choice" data-select-child="thao-chi" type="button"><span class="avatar large" style="background:#dcfce7;color:#15803d">TC</span><span class="student-choice-content"><strong>Trần Thảo Chi</strong><span><i class="fa-solid fa-book-open"></i> Lớp 3 · Toán cơ bản &nbsp; · &nbsp; <i class="fa-solid fa-location-dot"></i> Cơ sở 1, Nguyễn Chí Thanh</span></span><i class="fa-solid fa-chevron-right" style="color:#94a3b8"></i></button>
+        </div></section>
+        <section class="parent-only" id="parent-schedule"><div class="page-heading"><div><h1>Hồ sơ học sinh</h1><p>Thông tin cá nhân và lịch học tuần này.</p></div><button class="button" data-parent-view="children"><i class="fa-solid fa-arrow-left"></i> Danh sách con</button></div><div class="student-details"><article class="card"><div class="profile-card"><div class="avatar large" id="child-avatar">MA</div><div><h2 style="margin:0 0 6px;font-size:17px" id="child-name">Nguyễn Minh Anh</h2><span class="tag">Đang theo học · Lớp 5</span></div></div><div class="profile-facts"><div class="fact"><small>Ngày sinh</small><strong id="child-birth">15/08/2012</strong></div><div class="fact"><small>Giới tính</small><strong>Nữ</strong></div><div class="fact"><small>Lớp đang học</small><strong id="child-class">Toán nâng cao 5A</strong></div><div class="fact"><small>Giáo viên</small><strong>Nguyễn Thu Hà</strong></div><div class="fact" style="grid-column:1/-1"><small>Cơ sở đang học</small><strong>Số nhà 20, ngõ 62 Nguyễn Chí Thanh, quận Đống Đa, Hà Nội.</strong></div></div></article><article class="card"><h2 class="card-title">Thông tin phụ huynh <span class="tag green">Đã xác minh</span></h2><div class="fact"><small>Người giám hộ</small><strong>Trần Minh Quân</strong></div><div class="fact" style="margin-top:16px"><small>Số điện thoại</small><strong>09xx xxx 128</strong></div><div class="fact" style="margin-top:16px"><small>Email</small><strong>minhquan@example.com</strong></div><div class="fact" style="margin-top:16px"><small>Thời gian đào tạo</small><strong>12 tháng · Khóa hè + Thu</strong></div></article></div><article class="card"><h2 class="card-title">Lịch học tuần này <span class="muted">26/10 – 01/11/2026</span></h2><div class="week-grid"><div class="week-day"><h4>THỨ 2</h4><div class="lesson"><strong>Toán 5A</strong>GV Nguyễn Thu Hà<br>16:00 – 18:00</div></div><div class="week-day"><h4>THỨ 3</h4><span class="tag gray">Không có lịch</span></div><div class="week-day"><h4>THỨ 4</h4><div class="lesson blue"><strong>Gia sư Toán</strong>GV Lê Hoàng An<br>18:00 – 19:00</div></div><div class="week-day"><h4>THỨ 5</h4><span class="tag gray">Không có lịch</span></div><div class="week-day"><h4>THỨ 6</h4><div class="lesson"><strong>Toán 5A</strong>GV Nguyễn Thu Hà<br>16:00 – 18:00</div></div><div class="week-day"><h4>THỨ 7</h4><span class="tag gray">Không có lịch</span></div><div class="week-day"><h4>CHỦ NHẬT</h4><div class="lesson blue"><strong>Giải đề Toán</strong>GV Nguyễn Thu Hà<br>09:00 – 10:30</div></div></div></article></section>
+        <section class="parent-only" id="parent-fees"><div class="page-heading"><div><h1>Quản lý học phí</h1><p>Học phí tháng 10/2026 · <span id="fee-child-name">Nguyễn Minh Anh</span></p></div></div><div class="grid-2"><div><article class="fee-highlight" style="margin-bottom:16px"><div><small>Học phí cần đóng · Tháng 10/2026</small><h2>2.500.000 VNĐ</h2><small><i class="fa-regular fa-clock"></i> Hạn thanh toán: 10/11/2026</small></div><button class="button" data-action="vietqr"><i class="fa-solid fa-qrcode"></i> Thanh toán VietQR</button></article><article class="card"><h2 class="card-title">Chi tiết học phí hiện tại</h2><div class="list-row"><div class="list-main">Số buổi học dự kiến</div><strong>12 buổi</strong></div><div class="list-row"><div class="list-main">Đơn giá</div><strong>200.000 VNĐ/buổi</strong></div><div class="list-row"><div class="list-main">Khấu trừ · Nghỉ có phép tháng trước</div><strong style="color:var(--green)">− 200.000 VNĐ</strong></div><div class="list-row"><div class="list-main">Phụ phí tài liệu</div><strong>100.000 VNĐ</strong></div><div class="list-row"><strong>Tổng cộng cần thanh toán</strong><strong style="color:#c2410c">2.500.000 VNĐ</strong></div></article></div><article class="card"><h2 class="card-title">Lịch sử thanh toán</h2><div class="list-row"><div class="list-main"><strong>Tháng 09/2026</strong><small>Ngày giao dịch: 10/09/2026</small></div><div class="list-value">2.400.000 VNĐ<br><span class="tag green">Đã thanh toán</span></div></div><div class="list-row"><div class="list-main"><strong>Tháng 08/2026</strong><small>Ngày giao dịch: 12/08/2026</small></div><div class="list-value">2.600.000 VNĐ<br><span class="tag green">Đã thanh toán</span></div></div><button class="button" style="width:100%;margin-top:17px" data-action="payment-history">Xem tất cả lịch sử</button></article></div></section>
+        <section class="parent-only" id="parent-results"><div class="page-heading"><div><h1>Kết quả học tập</h1><p>Theo dõi chuyên cần, điểm số và nhận xét của giáo viên.</p></div><span class="tag">Học kỳ I · 2026–2027</span></div><div class="grid-equal"><article class="card"><h2 class="card-title">Thống kê chuyên cần</h2><div style="display:flex;align-items:center;gap:20px"><div class="attendance-ring"><strong>94%</strong></div><div><strong>Toán nâng cao 5A</strong><p style="color:var(--text-desc);font-size:11px;line-height:1.9">Có mặt: 18 buổi<br>Vắng mặt: 1 buổi<br>Đi muộn: 0 buổi</p><strong style="color:var(--green)">Rất tốt</strong></div></div></article><article class="card"><h2 class="card-title">Phổ điểm theo tháng</h2><div class="chart-wrap short"><canvas id="parent-score-chart" aria-label="Biểu đồ phổ điểm theo tháng"></canvas></div></article></div><article class="card"><h2 class="card-title">Nhận xét lớp Toán nâng cao 5A <span class="tag">GV: Nguyễn Thu Hà</span></h2><div class="table-wrap"><table><thead><tr><th>STT</th><th>NGÀY HỌC</th><th>ĐIỂM DANH</th><th>ĐIỂM BTVN</th><th>NHẬN XÉT</th></tr></thead><tbody><tr><td>1</td><td>15/10/2026</td><td><span class="tag green">Có mặt</span></td><td><strong>9,0</strong></td><td>Làm bài tốt, cần chú ý trình bày cẩn thận hơn.</td></tr><tr><td>2</td><td>18/10/2026</td><td><span class="tag green">Có mặt</span></td><td><strong>8,5</strong></td><td>Tiếp thu bài nhanh, tích cực phát biểu.</td></tr><tr><td>3</td><td>22/10/2026</td><td><span class="tag red">Vắng có phép</span></td><td>—</td><td>Đã gửi bài học bù qua ứng dụng.</td></tr><tr><td>4</td><td>25/10/2026</td><td><span class="tag green">Có mặt</span></td><td><strong>9,5</strong></td><td>Hoàn thành tốt bài tập vận dụng.</td></tr></tbody></table></div></article></section>
+      </div>
+    </main>
+  </div>
+  <button class="ai-launcher" id="ai-launcher" type="button" aria-label="Mở trợ lý AI" aria-expanded="false" aria-controls="ai-panel">
+    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span class="ai-launcher-label">Trợ lý Hòa Ma AI</span>
+  </button>
+  <section class="ai-panel" id="ai-panel" role="dialog" aria-label="Trợ lý Hòa Ma AI" hidden>
+    <header class="ai-header">
+      <span class="ai-mark"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+      <div class="ai-title"><strong>Trợ lý Hòa Ma AI <span class="tag" style="padding:2px 6px;font-size:8px">DEMO</span></strong><small id="ai-role-label">Tư vấn theo vai trò của bạn</small></div>
+      <button class="ai-clear" id="ai-clear" type="button" aria-label="Bắt đầu hội thoại mới" title="Hội thoại mới"><i class="fa-solid fa-rotate-right"></i></button>
+      <button class="ai-close" id="ai-close" type="button" aria-label="Đóng trợ lý"><i class="fa-solid fa-xmark"></i></button>
+    </header>
+    <div class="ai-scope" id="ai-scope-note">Trợ lý sử dụng câu trả lời mô phỏng và dữ liệu mẫu đang có trên trang.</div>
+    <div class="ai-messages" id="ai-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+    <div class="ai-suggestions" id="ai-suggestions" aria-label="Câu hỏi gợi ý"></div>
+    <form class="ai-compose" id="ai-form">
+      <textarea id="ai-input" rows="1" maxlength="500" aria-label="Nhập câu hỏi" placeholder="Hỏi trợ lý theo vai trò của bạn..."></textarea>
+      <button class="ai-send" id="ai-send" type="submit" aria-label="Gửi câu hỏi"><i class="fa-solid fa-arrow-up"></i></button>
+    </form>
+    <div class="ai-disclaimer">Bản demo chạy cục bộ, không kết nối mô hình AI hay gửi dữ liệu ra ngoài.<br>Không nhập thông tin cá nhân nhạy cảm của học sinh.</div>
+  </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    "use strict";
+    const roleNavigation = {
+      admin: [
+        ["dashboard", "Dashboard", "fa-table-columns"], ["crm", "CRM", "fa-address-book"],
+        ["education", "Học vụ & Đào tạo", "fa-book-open"], ["hr", "Quản lý nhân sự", "fa-users"],
+        ["finance", "Tài chính & Kế toán", "fa-wallet"], ["support", "CSKH", "fa-headset"],
+        ["reports", "Báo cáo", "fa-chart-pie"], ["settings", "Setting", "fa-gear"]
+      ],
+      manager: [
+        ["home", "Trang chủ", "fa-house"], ["teachers", "Giáo viên", "fa-chalkboard-user"],
+        ["students", "Học viên", "fa-user-graduate"], ["courses", "Khóa học", "fa-book"],
+        ["schedule", "Lịch khóa biểu", "fa-calendar-days"], ["fees", "Học phí", "fa-receipt"],
+        ["reports", "Báo cáo", "fa-chart-column"]
+      ],
+      teacher: [
+        ["dashboard", "Dashboard", "fa-table-columns"], ["classes", "Lớp học", "fa-chalkboard"],
+        ["results", "Quản lý kết quả", "fa-square-poll-vertical"], ["proposal", "Đề xuất dạy bù/thay", "fa-calendar-plus"]
+      ]
+    };
+    const roleTitles = { admin: "Ban giám đốc", manager: "Quản lý cơ sở", teacher: "Giáo viên", parent: "Phụ huynh" };
+    const roleNames = { admin: "Nguyễn Thu Hà", manager: "Trần Minh Quân", teacher: "Nguyễn Thu Hà", parent: "Trần Minh Quân" };
+    const roleAvatars = { admin: "QT", manager: "QL", teacher: "NH", parent: "TQ" };
+    let activeRole = "admin";
+    let activeTab = "dashboard";
+    let selectedChild = "minh-anh";
+    const accountsStorageKey = "hoa-ma-toan-demo-accounts-v1";
+    const sessionStorageKey = "hoa-ma-toan-demo-session-v1";
+    const demoAccounts = [
+      { username: "admin", password: "123456", email: "admin@hoamatoan.vn", role: "admin", name: "Nguyễn Thu Hà" },
+      { username: "quanly", password: "123456", email: "quanly@hoamatoan.vn", role: "manager", name: "Trần Minh Quân" },
+      { username: "giaovien", password: "123456", email: "giaovien@hoamatoan.vn", role: "teacher", name: "Nguyễn Thu Hà" },
+      { username: "phuhuynh", password: "123456", email: "phuhuynh@hoamatoan.vn", role: "parent", name: "Trần Minh Quân" }
+    ];
+    let accounts = [...demoAccounts];
+    let accountToReset = null;
+    let aiReplyPending = false;
+    let aiReplyTimer = 0;
+    let aiRequestId = 0;
+    let toastTimer;
+    const chartInstances = {};
+    const toast = document.getElementById("toast");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    const aiRoleConfig = {
+      admin: {
+        label: "Ban giám đốc · phân tích vận hành",
+        scope: "Đọc nhanh KPI, công nợ, dòng tiền và chất lượng lớp từ số liệu mô phỏng.",
+        suggestions: ["Tóm tắt tình hình tháng", "Khoản học phí nào cần ưu tiên?", "Gợi ý nội dung báo cáo"],
+        welcome: "Xin chào! Tôi có thể giúp bạn đọc nhanh các chỉ số mẫu và gợi ý việc cần ưu tiên. Bạn muốn xem doanh thu, công nợ hay chất lượng lớp?",
+        rules: [
+          { match: ["doanh thu", "dòng tiền", "thu chi", "lợi nhuận"], reply: "Theo dashboard mẫu, doanh thu tháng là 270 triệu đồng. Báo cáo dòng tiền ghi nhận tổng thu 350 triệu, tổng chi 120 triệu và lợi nhuận gộp 230 triệu. Hai màn hình minh họa các phạm vi/kỳ tổng hợp khác nhau; hãy đối soát trước khi ra quyết định." },
+          { match: ["công nợ", "quá hạn", "học phí", "nhắc phí"], reply: "Dashboard mẫu đang có 5 khoản học phí quá hạn; báo cáo dòng tiền hiển thị công nợ cần thu là 45 triệu đồng. Nên xác minh giao dịch, ưu tiên khoản quá hạn lâu nhất và liên hệ phụ huynh riêng tư." },
+          { match: ["lớp", "chất lượng", "giáo viên", "chuyên cần"], reply: "Báo cáo mẫu có 32 lớp, hiệu suất lấp đầy 85% và tỷ lệ thu đúng hạn 92%. Có thể rà soát lớp có chuyên cần hoặc tỷ lệ thu thấp, rồi trao đổi với giáo viên/cơ sở để xác định nguyên nhân." },
+          { match: ["báo cáo", "ưu tiên", "tóm tắt", "tháng"], reply: "Tóm tắt dữ liệu mô phỏng: 248 học viên đang học, doanh thu tháng 270 triệu đồng, 30 triệu đồng học phí chưa thu và 48 triệu đồng lương chờ duyệt. Ưu tiên kiểm tra công nợ, duyệt kỳ lương và đối chiếu dòng tiền." }
+        ],
+        fallback: "Tôi hỗ trợ đọc KPI mẫu, công nợ, dòng tiền hoặc chất lượng lớp. Hãy hỏi một trong các chủ đề đó; câu trả lời chỉ dựa trên số liệu demo."
+      },
+      manager: {
+        label: "Quản lý cơ sở · hỗ trợ vận hành",
+        scope: "Ưu tiên cảnh báo, xếp lịch phòng và nhắc học phí dựa trên số liệu mô phỏng của cơ sở.",
+        suggestions: ["Tóm tắt việc cần xử lý", "Kiểm tra lịch bị trùng", "Gợi ý nhắc học phí"],
+        welcome: "Xin chào! Tôi có thể gom cảnh báo cơ sở thành việc cần làm và gợi ý cách xử lý lịch, học phí. Bạn muốn bắt đầu từ đâu?",
+        rules: [
+          { match: ["trùng lịch", "lịch bị trùng", "lịch phòng", "xếp lịch", "phòng"], reply: "Dashboard mẫu có 2 lớp Toán 8B và Toán 9A cùng sử dụng phòng 201 lúc 18:00 thứ Tư. Hãy kiểm tra phòng còn trống hoặc đề xuất đổi ca; chỉ xác nhận sau khi giáo viên và phụ huynh được thông báo." },
+          { match: ["học phí", "nợ phí", "công nợ", "nhắc phí"], reply: "Có 5 học viên quá hạn, tổng công nợ mẫu 18,6 triệu đồng. Gợi ý: đối soát giao dịch, phân công người phụ trách, gửi lời nhắc riêng tư và cập nhật trạng thái sau khi xác nhận." },
+          { match: ["tóm tắt", "cần xử lý", "ưu tiên", "cảnh báo"], reply: "Ba việc ưu tiên từ dữ liệu mẫu: (1) xử lý 5 khoản học phí quá hạn; (2) giải quyết xung đột phòng của Toán 8B và 9A lúc 18:00 thứ Tư; (3) xác nhận giáo viên cho ca Toán 5A lúc 16:30. Hãy đối chiếu lịch thật trước khi điều phối." },
+          { match: ["giáo viên", "nhân sự", "điểm danh"], reply: "Danh sách mẫu có 12 giáo viên, 10 người có lịch dạy hôm nay. Trước khi xếp thay ca, kiểm tra tải giảng dạy, chuyên môn và xác nhận trực tiếp với giáo viên." }
+        ],
+        fallback: "Tôi hỗ trợ các chủ đề vận hành cơ sở: cảnh báo, lịch/phòng, học phí hoặc phân công giáo viên. Hãy đặt câu hỏi cụ thể để đối chiếu số liệu demo."
+      },
+      teacher: {
+        label: "Giáo viên · trợ lý soạn dạy",
+        scope: "Gợi ý giáo án, bài tập phân hóa và nhận xét dựa trên lớp mẫu; giáo viên cần duyệt nội dung trước khi dùng.",
+        suggestions: ["Soạn hoạt động Toán 5A", "Tạo bài tập phân hóa", "Gợi ý nhận xét học sinh"],
+        welcome: "Xin chào cô Hà! Tôi có thể gợi ý hoạt động dạy học, bài tập theo mức độ hoặc cách viết nhận xét mang tính xây dựng. Cô hãy kiểm tra nội dung trước khi sử dụng.",
+        rules: [
+          { match: ["soạn", "giáo án", "hoạt động", "bài dạy"], reply: "Gợi ý hoạt động 15 phút – chủ đề phân số:\n• 3 phút: khởi động bằng hình chia phần bằng nhau.\n• 7 phút: học sinh ghép thẻ hình với phân số theo cặp.\n• 3 phút: giải thích vì sao hai phân số biểu diễn cùng lượng.\n• 2 phút: phiếu thoát gồm một câu cơ bản và một câu vận dụng.\nCô điều chỉnh theo bài đang học và mức độ thực tế của lớp." },
+          { match: ["bài tập", "câu hỏi", "đề bài", "phân hóa"], reply: "Có thể chia bài tập thành 3 mức:\n• Cơ bản: nhận biết tử số, mẫu số qua hình minh họa.\n• Đạt chuẩn: quy đồng hai phân số có mẫu nhỏ.\n• Nâng cao: tạo bài toán thực tế có hai cách biểu diễn cùng kết quả.\nKhuyến khích học sinh giải thích cách làm, không chỉ chấm đáp số." },
+          { match: ["nhận xét", "phản hồi", "điểm"], reply: "Mẫu nhận xét tích cực: “Con hoàn thành tốt bài tập và chủ động nêu cách giải. Buổi tới, con hãy kiểm tra lại bước quy đồng trước khi kết luận để bài làm chính xác hơn.”\nChỉ dùng khi phù hợp với minh chứng thực tế; tránh đánh giá học sinh từ một bài kiểm tra." },
+          { match: ["lịch", "lớp", "hôm nay"], reply: "Lịch mẫu có Toán 5A thứ Hai, ca 14:00–16:00 và Toán Logic 6B ca 16:00–18:00. Đây là dữ liệu minh họa; hãy mở bảng lịch dạy để đối chiếu giờ và phòng." }
+        ],
+        fallback: "Tôi có thể gợi ý giáo án ngắn, bài tập theo 3 mức, nhận xét tích cực hoặc điều chỉnh hoạt động lớp. Hãy cho biết khối lớp/chủ đề, không nhập dữ liệu nhạy cảm của học sinh."
+      },
+      parent: {
+        label: "Phụ huynh · đồng hành cùng con",
+        scope: "Giải thích chỉ số học tập demo và gợi ý cách đồng hành; không chẩn đoán, không làm bài thay con.",
+        suggestions: ["Giải thích chuyên cần của con", "Gợi ý ôn tập 20 phút", "Nên hỏi giáo viên điều gì?"],
+        welcome: "Xin chào! Tôi có thể giúp diễn giải kết quả mẫu, gợi ý cách ôn tập nhẹ nhàng và chuẩn bị câu hỏi cho giáo viên. Tôi sẽ gợi ý từng bước thay vì làm bài thay con.",
+        rules: [
+          { match: ["chuyên cần", "đi học", "vắng", "nghỉ"], reply: () => `Hồ sơ demo của ${getSelectedChildName()} ghi nhận chuyên cần 94%, có mặt 18 buổi và vắng 1 buổi. Đây chỉ là số liệu minh họa. Bạn có thể hỏi giáo viên xem con cần học bù nội dung buổi vắng không.` },
+          { match: ["điểm", "kết quả", "học tập", "tiến bộ"], reply: () => `Điểm bài tập mẫu của ${getSelectedChildName()} khoảng 8,5–9,5/10 và có nhận xét tích cực về việc tham gia học. Hãy xem điểm như một tín hiệu để trò chuyện, không phải đánh giá toàn bộ năng lực. Có thể hỏi con: “Phần nào tuần này con thấy tự tin nhất, phần nào muốn luyện thêm?”` },
+          { match: ["ôn tập", "bài tập", "giúp con", "học ở nhà"], reply: "Gợi ý phiên ôn tập 20 phút: 3 phút chọn mục tiêu; 10 phút làm 2–3 câu từ dễ đến vừa; 5 phút để con giải thích cách nghĩ; 2 phút ghi lại điều còn vướng để hỏi giáo viên. Đưa gợi ý từng bước, để con tự tìm lời giải." },
+          { match: ["học phí", "thanh toán", "hạn đóng"], reply: "Màn hình mẫu hiển thị khoản cần đóng 2.500.000 VNĐ, hạn 10/11/2026. Đây không phải thông báo thanh toán thật. Hãy xác nhận số tiền và thông tin tài khoản với trung tâm qua kênh chính thức trước khi chuyển khoản." },
+          { match: ["giáo viên", "hỏi", "trao đổi"], reply: "Bạn có thể hỏi giáo viên: “Con đang vững phần nào?”, “Một kỹ năng con nên luyện thêm tuần này là gì?” và “Gia đình có thể hỗ trợ ra sao mà không làm bài thay con?”" },
+          { match: ["lịch", "thời khóa biểu"], reply: "Lịch học trong hồ sơ là dữ liệu mô phỏng. Xem mục “Lịch học” trong hồ sơ con để kiểm tra các buổi; nếu cần đổi lịch, hãy liên hệ trực tiếp cơ sở." }
+        ],
+        fallback: "Tôi có thể giải thích chuyên cần/điểm số, gợi ý ôn tập tại nhà, đọc lịch hoặc chuẩn bị câu hỏi cho giáo viên. Tôi không thay giáo viên và không đưa ra chẩn đoán."
+      }
+    };
+
+    function normalizeAIText(value) {
+      return value.toLocaleLowerCase("vi")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d");
+    }
+
+    function getSelectedChildName() {
+      return document.getElementById("child-name").textContent || "con";
+    }
+
+    function appendAIMessage(text, sender) {
+      const message = document.createElement("div");
+      message.className = `ai-message${sender === "user" ? " user" : ""}`;
+      message.textContent = text;
+      document.getElementById("ai-messages").append(message);
+      message.scrollIntoView({ block: "end", behavior: "smooth" });
+      return message;
+    }
+
+    function setAIContext() {
+      const config = aiRoleConfig[activeRole] || aiRoleConfig.admin;
+      document.getElementById("ai-role-label").textContent = config.label;
+      document.getElementById("ai-scope-note").textContent = config.scope;
+      const suggestions = document.getElementById("ai-suggestions");
+      suggestions.replaceChildren();
+      config.suggestions.forEach(prompt => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ai-suggestion";
+        button.textContent = prompt;
+        button.addEventListener("click", () => submitAIQuestion(prompt));
+        suggestions.append(button);
+      });
+    }
+
+    function toggleAI(open) {
+      const panel = document.getElementById("ai-panel");
+      const launcher = document.getElementById("ai-launcher");
+      panel.hidden = !open;
+      launcher.setAttribute("aria-expanded", String(open));
+      launcher.setAttribute("aria-label", open ? "Đóng trợ lý AI" : "Mở trợ lý AI");
+      if (open) {
+        setAIContext();
+        const messages = document.getElementById("ai-messages");
+        if (!messages.children.length) appendAIMessage(aiRoleConfig[activeRole].welcome, "assistant");
+        document.getElementById("ai-input").focus();
+      } else {
+        launcher.focus();
+      }
+    }
+
+    function getAIReply(question, role = activeRole) {
+      const config = aiRoleConfig[role] || aiRoleConfig.admin;
+      const normalized = normalizeAIText(question);
+      if (/^(xin chao|chao|hello|hi)(\b|$)/.test(normalized)) return config.welcome;
+      const matched = config.rules.find(rule => rule.match.some(keyword => normalized.includes(normalizeAIText(keyword))));
+      if (!matched) return config.fallback;
+      return typeof matched.reply === "function" ? matched.reply() : matched.reply;
+    }
+
+    function submitAIQuestion(question) {
+      const text = question.trim();
+      if (!text || aiReplyPending) return;
+      appendAIMessage(text, "user");
+      document.getElementById("ai-input").value = "";
+      const send = document.getElementById("ai-send");
+      send.disabled = true;
+      aiReplyPending = true;
+      const requestId = ++aiRequestId;
+      const reply = getAIReply(text);
+      const typing = document.createElement("div");
+      typing.className = "ai-message typing";
+      typing.textContent = "Trợ lý đang xem ngữ cảnh demo...";
+      document.getElementById("ai-messages").append(typing);
+      typing.scrollIntoView({ block: "end", behavior: "smooth" });
+      aiReplyTimer = window.setTimeout(() => {
+        if (requestId !== aiRequestId) return;
+        typing.remove();
+        appendAIMessage(reply, "assistant");
+        aiReplyPending = false;
+        send.disabled = false;
+        document.getElementById("ai-input").focus();
+      }, 420);
+    }
+
+    function clearAIConversation() {
+      window.clearTimeout(aiReplyTimer);
+      aiRequestId += 1;
+      aiReplyPending = false;
+      document.getElementById("ai-send").disabled = false;
+      const messages = document.getElementById("ai-messages");
+      messages.replaceChildren();
+      appendAIMessage(aiRoleConfig[activeRole].welcome, "assistant");
+    }
+
+    function setAuthMessage(id, message, success = false) {
+      const element = document.getElementById(id);
+      element.textContent = message;
+      element.classList.toggle("success", success);
+    }
+
+    function fillDemoCredentials(role) {
+      const account = demoAccounts.find(item => item.role === role);
+      if (!account) return;
+      document.getElementById("login-username").value = account.username;
+      document.getElementById("login-password").value = account.password;
+      setAuthMessage("login-message", "Đã tự điền tài khoản demo. Bạn có thể đăng nhập ngay.", true);
+    }
+
+    function showAuthView(view) {
+      document.querySelectorAll(".auth-pane").forEach(pane => pane.classList.toggle("hidden", pane.id !== `auth-${view}-pane`));
+      document.getElementById("auth-screen").setAttribute("aria-label", {
+        login: "Đăng nhập hệ thống", register: "Đăng ký tài khoản",
+        forgot: "Khôi phục mật khẩu", reset: "Cấp mật khẩu mới"
+      }[view]);
+      const heading = document.querySelector(`#auth-${view}-pane h2`);
+      if (heading) heading.focus?.();
+    }
+
+    function loadAccounts() {
+      const saved = localStorage.getItem(accountsStorageKey);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed) || parsed.some(account => !account || typeof account.username !== "string" || typeof account.email !== "string" || !["admin", "manager", "teacher", "parent"].includes(account.role))) {
+          throw new TypeError("Danh sách tài khoản demo không đúng định dạng.");
+        }
+        accounts = [...demoAccounts, ...parsed.filter(account => !demoAccounts.some(demo => demo.username === account.username.toLowerCase()))];
+      } catch (error) {
+        console.error("Không thể đọc danh sách tài khoản demo:", error);
+        showToast("Dữ liệu tài khoản trên trình duyệt không hợp lệ. Tài khoản demo mặc định vẫn sử dụng được.");
+        accounts = [...demoAccounts];
+      }
+    }
+
+    function saveAccounts(messageId) {
+      try {
+        localStorage.setItem(accountsStorageKey, JSON.stringify(accounts.filter(account => !demoAccounts.some(demo => demo.username === account.username.toLowerCase()))));
+        return true;
+      } catch (error) {
+        console.error("Không thể lưu tài khoản demo:", error);
+        setAuthMessage(messageId, "Không thể lưu dữ liệu trong trình duyệt này. Hãy kiểm tra quyền lưu trữ rồi thử lại.");
+        return false;
+      }
+    }
+
+    function enterPortal(account, remember = false) {
+      document.getElementById("role-selector").value = account.role;
+      document.getElementById("top-name").textContent = account.name || roleNames[account.role];
+      changeRole(account.role);
+      document.body.classList.remove("auth-locked");
+      document.getElementById("auth-screen").classList.add("hidden");
+      if (remember) {
+        try {
+          localStorage.setItem(sessionStorageKey, JSON.stringify({ username: account.username, role: account.role }));
+        } catch (error) {
+          console.error("Không thể ghi nhớ phiên đăng nhập:", error);
+          showToast("Đã đăng nhập, nhưng trình duyệt không cho phép ghi nhớ phiên.");
+        }
+      } else {
+        sessionStorage.removeItem(sessionStorageKey);
+      }
+    }
+
+    function signOut() {
+      localStorage.removeItem(sessionStorageKey);
+      document.body.classList.add("auth-locked");
+      document.getElementById("auth-screen").classList.remove("hidden");
+      document.getElementById("login-form").reset();
+      fillDemoCredentials(document.getElementById("login-role").value);
+      showAuthView("login");
+      document.getElementById("login-username").focus();
+    }
+
+    function initializeAuth() {
+      loadAccounts();
+      document.querySelectorAll("[data-auth-view]").forEach(button => button.addEventListener("click", () => {
+        document.querySelectorAll(".auth-message").forEach(message => { message.textContent = ""; message.classList.remove("success"); });
+        showAuthView(button.dataset.authView);
+      }));
+      document.querySelectorAll("[data-toggle-password]").forEach(button => button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.togglePassword);
+        input.type = input.type === "password" ? "text" : "password";
+        button.textContent = input.type === "password" ? "Hiện" : "Ẩn";
+      }));
+      document.getElementById("login-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const username = document.getElementById("login-username").value.trim().toLowerCase();
+        const password = document.getElementById("login-password").value;
+        const role = document.getElementById("login-role").value;
+        const account = accounts.find(item => item.username.toLowerCase() === username && item.password === password && item.role === role);
+        if (!account) {
+          setAuthMessage("login-message", "Thông tin đăng nhập hoặc vai trò chưa chính xác. Vui lòng kiểm tra và thử lại.");
+          return;
+        }
+        setAuthMessage("login-message", "");
+        enterPortal(account, document.getElementById("remember-login").checked);
+      });
+      document.getElementById("register-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const username = document.getElementById("register-username").value.trim().toLowerCase();
+        const email = document.getElementById("register-email").value.trim().toLowerCase();
+        const password = document.getElementById("register-password").value;
+        const confirmation = document.getElementById("register-confirm").value;
+        if (accounts.some(account => account.username.toLowerCase() === username)) {
+          setAuthMessage("register-message", "Tên đăng nhập đã được sử dụng. Hãy chọn tên khác.");
+          return;
+        }
+        if (accounts.some(account => account.email.toLowerCase() === email)) {
+          setAuthMessage("register-message", "Email này đã được liên kết với một tài khoản.");
+          return;
+        }
+        if (password !== confirmation) {
+          setAuthMessage("register-message", "Mật khẩu xác nhận chưa khớp.");
+          return;
+        }
+        const account = {
+          username, email, password,
+          role: document.getElementById("register-role").value,
+          name: document.getElementById("register-name").value.trim()
+        };
+        accounts.push(account);
+        if (!saveAccounts("register-message")) {
+          accounts.pop();
+          return;
+        }
+        document.getElementById("login-username").value = username;
+        document.getElementById("login-role").value = account.role;
+        document.getElementById("login-password").value = "";
+        document.getElementById("register-form").reset();
+        setAuthMessage("login-message", "Tạo tài khoản thành công. Hãy đăng nhập bằng mật khẩu vừa đăng ký.", true);
+        showAuthView("login");
+      });
+      document.getElementById("forgot-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const username = document.getElementById("forgot-username").value.trim().toLowerCase();
+        const email = document.getElementById("forgot-email").value.trim().toLowerCase();
+        accountToReset = accounts.find(account => account.username.toLowerCase() === username && account.email.toLowerCase() === email) || null;
+        if (!accountToReset) {
+          setAuthMessage("forgot-message", "Không tìm thấy tài khoản khớp với tên đăng nhập và email này.");
+          return;
+        }
+        document.getElementById("reset-account-label").textContent = `Đã xác minh ${accountToReset.username}. Hãy tạo mật khẩu mới cho tài khoản.`;
+        setAuthMessage("reset-message", "");
+        document.getElementById("reset-form").reset();
+        showAuthView("reset");
+      });
+      document.getElementById("reset-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const password = document.getElementById("reset-password").value;
+        if (!accountToReset) {
+          setAuthMessage("reset-message", "Phiên xác minh đã hết. Vui lòng xác minh tài khoản lại.");
+          showAuthView("forgot");
+          return;
+        }
+        if (password !== document.getElementById("reset-confirm").value) {
+          setAuthMessage("reset-message", "Mật khẩu xác nhận chưa khớp.");
+          return;
+        }
+        const previousPassword = accountToReset.password;
+        accountToReset.password = password;
+        if (!saveAccounts("reset-message")) {
+          accountToReset.password = previousPassword;
+          return;
+        }
+        document.getElementById("login-username").value = accountToReset.username;
+        document.getElementById("login-role").value = accountToReset.role;
+        document.getElementById("login-password").value = "";
+        accountToReset = null;
+        document.getElementById("forgot-form").reset();
+        setAuthMessage("login-message", "Đã cấp mật khẩu mới. Vui lòng đăng nhập bằng mật khẩu vừa đặt.", true);
+        showAuthView("login");
+      });
+      document.getElementById("btn-logout").addEventListener("click", signOut);
+      document.getElementById("login-role").addEventListener("change", event => fillDemoCredentials(event.target.value));
+      fillDemoCredentials(document.getElementById("login-role").value);
+      showAuthView("login");
+      const remembered = localStorage.getItem(sessionStorageKey);
+      if (remembered) {
+        try {
+          const session = JSON.parse(remembered);
+          const account = accounts.find(item => item.username === session.username && item.role === session.role);
+          if (account) {
+            enterPortal(account, true);
+            return;
+          }
+          localStorage.removeItem(sessionStorageKey);
+        } catch (error) {
+          console.error("Không thể khôi phục phiên đăng nhập:", error);
+          localStorage.removeItem(sessionStorageKey);
+          showToast("Phiên đăng nhập đã lưu không hợp lệ. Vui lòng đăng nhập lại.");
+        }
+      }
+      document.body.classList.add("auth-locked");
+      changeRole("admin");
+    }
+
+    function drawCharts() {
+      if (!window.Chart) return;
+      const base = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 7, padding: 18, font: { family: "Be Vietnam Pro", size: 10 } } } }, scales: { x: { grid: { display: false }, ticks: { color: "#64748b", font: { size: 10 } } }, y: { beginAtZero: true, grid: { color: "#f1f5f9" }, ticks: { color: "#94a3b8", font: { size: 10 } } } } };
+      const addChart = (id, config) => {
+        const canvas = document.getElementById(id);
+        if (!canvas || chartInstances[id]) return;
+        chartInstances[id] = new Chart(canvas, config);
+      };
+      addChart("admin-week-chart", { type: "bar", data: { labels: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"], datasets: [{ label: "Doanh thu", data: [62, 70, 76, 83], backgroundColor: "#fdba74", borderRadius: 5 }, { label: "Thu học phí", data: [68, 74, 81, 91], backgroundColor: "#f97316", borderRadius: 5 }] }, options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, suggestedMax: 100 } } } });
+      addChart("finance-chart", { type: "bar", data: { labels: ["Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10"], datasets: [{ label: "Thu", data: [175, 215, 255, 195, 235, 350], backgroundColor: "#22c55e", borderRadius: 5 }, { label: "Chi", data: [115, 135, 155, 175, 145, 120], backgroundColor: "#dc4b3e", borderRadius: 5 }] }, options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, suggestedMax: 400 } } } });
+      addChart("growth-chart", { type: "line", data: { labels: ["Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10"], datasets: [{ label: "Học viên", data: [310, 338, 360, 385, 418, 450], borderColor: "#f97316", backgroundColor: "#ffedd5", fill: true, tension: .38, yAxisID: "y" }, { label: "Doanh thu (triệu)", data: [190, 210, 235, 260, 288, 320], borderColor: "#3b82f6", tension: .38, yAxisID: "y1" }] }, options: { ...base, scales: { ...base.scales, y1: { position: "right", beginAtZero: true, grid: { drawOnChartArea: false } } } } });
+      addChart("course-chart", { type: "doughnut", data: { labels: ["Toán Tiểu học", "Toán THCS", "Toán THPT"], datasets: [{ data: [30, 45, 25], backgroundColor: ["#f97316", "#fb923c", "#22c55e"], borderWidth: 0, hoverOffset: 5 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "68%", plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, padding: 15, font: { family: "Be Vietnam Pro", size: 10 } } } } } });
+      addChart("parent-score-chart", { type: "bar", data: { labels: ["T8", "T9", "T10", "T11", "T12"], datasets: [{ label: "Minh Anh", data: [8.2, 8.6, 9.0, 8.8, 9.3], backgroundColor: "#f97316", borderRadius: 4 }, { label: "Trung bình lớp", data: [7.6, 7.8, 8.1, 7.9, 8.2], backgroundColor: "#cbd5e1", borderRadius: 4 }] }, options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, min: 0, max: 10 } } } });
+      Object.values(chartInstances).forEach(chart => chart.resize());
+    }
+
+    function setPanel(role, key) {
+      activeRole = role;
+      activeTab = key;
+      const wrapper = document.getElementById(`role-${role}`);
+      if (!wrapper) return;
+      wrapper.querySelectorAll(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `${role}-${key}`));
+      wrapper.querySelectorAll(".nav-item").forEach(button => button.classList.toggle("active", button.dataset.key === key));
+      if (role === "admin") {
+        const activeFinance = key === "finance" ? "cashflow" : "";
+        document.querySelectorAll("#admin-finance .tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `finance-${activeFinance}`));
+        document.querySelectorAll("[data-finance-tab]").forEach(button => button.classList.toggle("active", button.dataset.financeTab === activeFinance));
+      }
+      drawCharts();
+    }
+
+    function renderNavigation(role) {
+      const nav = document.getElementById("role-navigation");
+      nav.replaceChildren();
+      (roleNavigation[role] || []).forEach(([key, label, icon]) => {
+        const button = document.createElement("button");
+        button.className = "nav-item";
+        button.type = "button";
+        button.dataset.key = key;
+        button.innerHTML = `<i class="fa-solid ${icon}" aria-hidden="true"></i><span>${label}</span>`;
+        button.addEventListener("click", () => setPanel(role, key));
+        nav.append(button);
+      });
+    }
+
+    function changeRole(role) {
+      const previousRole = activeRole;
+      activeRole = role;
+      document.querySelectorAll(".role-view").forEach(view => view.classList.toggle("active", view.id === `role-${role}`));
+      document.getElementById("sidebar").classList.toggle("hidden", role === "parent");
+      document.getElementById("parent-topnav").style.display = role === "parent" ? "flex" : "none";
+      document.getElementById("app-layout").classList.toggle("parent-layout", role === "parent");
+      document.getElementById("top-role").textContent = roleTitles[role];
+      document.getElementById("top-name").textContent = roleNames[role];
+      document.getElementById("top-avatar").textContent = roleAvatars[role];
+      setAIContext();
+      if (previousRole !== role && document.getElementById("ai-messages").children.length) clearAIConversation();
+      if (role === "parent") {
+        showParentView("children");
+      } else {
+        renderNavigation(role);
+        const firstTab = role === "manager" ? "home" : "dashboard";
+        setPanel(role, firstTab);
+      }
+    }
+
+    function showParentView(view) {
+      document.querySelectorAll("#role-parent .parent-only").forEach(panel => panel.classList.toggle("active", panel.id === `parent-${view}`));
+      document.querySelectorAll(".parent-nav-button").forEach(button => button.classList.toggle("active", button.dataset.parentView === view));
+      drawCharts();
+    }
+
+    function selectChild(child) {
+      selectedChild = child;
+      const data = {
+        "minh-anh": { name: "Nguyễn Minh Anh", avatar: "MA", birth: "15/08/2012", grade: "Toán nâng cao 5A" },
+        "bao-nam": { name: "Lê Bảo Nam", avatar: "BN", birth: "22/03/2010", grade: "Luyện thi vào 10" },
+        "thao-chi": { name: "Trần Thảo Chi", avatar: "TC", birth: "04/11/2014", grade: "Toán cơ bản lớp 3" }
+      }[child];
+      document.getElementById("child-name").textContent = data.name;
+      document.getElementById("child-avatar").textContent = data.avatar;
+      document.getElementById("child-birth").textContent = data.birth;
+      document.getElementById("child-class").textContent = data.grade;
+      document.getElementById("fee-child-name").textContent = data.name;
+      setAIContext();
+      showParentView("schedule");
+      showToast(`Đang xem hồ sơ của ${data.name}`);
+    }
+
+    document.getElementById("role-selector").addEventListener("change", event => changeRole(event.target.value));
+    document.querySelectorAll("[data-parent-view]").forEach(button => button.addEventListener("click", () => showParentView(button.dataset.parentView)));
+    document.querySelectorAll("[data-select-child]").forEach(button => button.addEventListener("click", () => selectChild(button.dataset.selectChild)));
+    document.querySelectorAll("[data-finance-tab]").forEach(button => button.addEventListener("click", () => {
+      const tab = button.dataset.financeTab;
+      document.querySelectorAll("#admin-finance .tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `finance-${tab}`));
+      document.querySelectorAll("[data-finance-tab]").forEach(item => item.classList.toggle("active", item === button));
+    }));
+    const actionMessages = {
+      "add-student": "Đã mở biểu mẫu thêm học viên (bản demo).",
+      "add-lead": "Đã mở biểu mẫu khách hàng tiềm năng (bản demo).",
+      "add-class": "Đã mở biểu mẫu tạo lớp học (bản demo).",
+      "add-employee": "Đã mở biểu mẫu thêm nhân sự (bản demo).",
+      "add-ticket": "Đã mở biểu mẫu yêu cầu hỗ trợ (bản demo).",
+      "review": "Đã ghi nhận yêu cầu xem xét kỳ lương.",
+      "remind": "Đã gửi nhắc học phí đến phụ huynh (bản demo).",
+      "create-income": "Đã mở biểu mẫu tạo phiếu thu.",
+      "create-expense": "Đã mở biểu mẫu tạo phiếu chi.",
+      "attendance": "Đã mở danh sách điểm danh lớp học.",
+      "students": "Đang mở danh sách học sinh của lớp.",
+      "save-results": "Kết quả học tập đã được lưu trên bản demo.",
+      "new-proposal": "Đã mở biểu mẫu đề xuất dạy bù / dạy thay.",
+      "save-settings": "Cài đặt đã được lưu trên bản demo.",
+      "payment-history": "Đang hiển thị toàn bộ lịch sử thanh toán.",
+      "vietqr": "VietQR bản demo: vui lòng quét mã thanh toán do trung tâm cung cấp."
+    };
+    document.addEventListener("click", event => {
+      const actionButton = event.target.closest("[data-action]");
+      if (actionButton) {
+        const action = actionButton.dataset.action;
+        if (action === "export") {
+          const rows = [...document.querySelectorAll(".role-view.active table tr")].map(row => [...row.cells].map(cell => `"${cell.innerText.replaceAll('"', '""')}"`).join(","));
+          if (!rows.length) { showToast("Không có dữ liệu bảng để xuất."); return; }
+          const blob = new Blob(["\ufeff" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "bao-cao-hoa-ma-toan.csv";
+          link.click();
+          URL.revokeObjectURL(url);
+          showToast("Đã xuất dữ liệu bảng thành tệp CSV.");
+        } else {
+          showToast(actionMessages[action] || "Thao tác đã được ghi nhận.");
+        }
+      }
+    });
+    document.getElementById("notification-button").addEventListener("click", () => showToast("Bạn có 3 thông báo mới cần xem."));
+    document.getElementById("ai-launcher").addEventListener("click", () => toggleAI(document.getElementById("ai-panel").hidden));
+    document.getElementById("ai-close").addEventListener("click", () => toggleAI(false));
+    document.getElementById("ai-clear").addEventListener("click", clearAIConversation);
+    document.getElementById("ai-form").addEventListener("submit", event => {
+      event.preventDefault();
+      submitAIQuestion(document.getElementById("ai-input").value);
+    });
+    document.getElementById("ai-input").addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        submitAIQuestion(event.currentTarget.value);
+      }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !document.getElementById("ai-panel").hidden) toggleAI(false);
+    });
+    document.getElementById("global-search").addEventListener("keydown", event => {
+      if (event.key === "Enter" && event.currentTarget.value.trim()) showToast(`Đang tìm kiếm: ${event.currentTarget.value.trim()}`);
+    });
+    initializeAuth();
+  </script>
+</body>
+</html>

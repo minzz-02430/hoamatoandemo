@@ -1,0 +1,98 @@
+Enum role {
+  admin
+  teacher
+  parent
+}
+
+Table users {
+  id int [pk, increment]
+  role role [not null]
+  name varchar(120) [not null]
+  username varchar(80) [not null, unique]
+  password_hash varchar(255) [not null]
+}
+
+Table students {
+  id int [pk, increment]
+  parent_id int [not null]
+  name varchar(120) [not null]
+  grade varchar(30)
+}
+
+Table courses {
+  id int [pk, increment]
+  name varchar(120) [not null]
+  fee decimal(12,2) [not null]
+}
+
+Table classes {
+  id int [pk, increment]
+  course_id int [not null]
+  teacher_id int [not null]
+  name varchar(120) [not null]
+  schedule varchar(120)
+}
+
+Table enrollments {
+  id int [pk, increment]
+  student_id int [not null]
+  class_id int [not null]
+}
+
+Table attendance {
+  id int [pk, increment]
+  enrollment_id int [not null]
+  lesson_date date [not null]
+  status varchar(30) [not null]
+}
+
+Table grades {
+  id int [pk, increment]
+  enrollment_id int [not null]
+  score decimal(4,2)
+  feedback text
+}
+
+Table invoices {
+  id int [pk, increment]
+  student_id int [not null]
+  period varchar(40) [not null]
+  amount decimal(12,2) [not null]
+  due_date date
+  status varchar(30) [not null]
+}
+
+Table payments {
+  id int [pk, increment]
+  invoice_id int [not null]
+  amount decimal(12,2) [not null]
+  paid_at timestamp
+  status varchar(30) [not null]
+}
+
+Table leads {
+  id int [pk, increment]
+  assigned_to int
+  name varchar(120) [not null]
+  phone varchar(30)
+  status varchar(30) [not null]
+}
+
+Table support_tickets {
+  id int [pk, increment]
+  parent_id int [not null]
+  subject varchar(160) [not null]
+  status varchar(30) [not null]
+}
+
+Ref: students.parent_id > users.id
+Ref: classes.course_id > courses.id
+Ref: classes.teacher_id > users.id
+Ref: enrollments.student_id > students.id
+Ref: enrollments.class_id > classes.id
+Ref: attendance.enrollment_id > enrollments.id
+Ref: grades.enrollment_id > enrollments.id
+Ref: invoices.student_id > students.id
+Ref: payments.invoice_id > invoices.id
+Ref: leads.assigned_to > users.id
+Ref: support_tickets.parent_id > users.id
